@@ -1,3 +1,5 @@
+### NOTE: If you've just stumbled across this repo for some reason, it's not ready yet. ;-) ###
+
 ### What is BabelExt? ###
 
 BabelExt is a library (or perhaps more of a boilerplate) meant to simplify the
