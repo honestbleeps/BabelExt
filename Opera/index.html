@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<script>
+opera.extension.addEventListener( "message", function( event ) {
+	// get JSON data (from event.data) using the same format used for chrome/safari extensions
+	var request = JSON.parse(event.data);
+	if ((typeof(request) != 'undefined') && (typeof(request.requestType) != 'undefined')) {
+		switch(request.requestType) {
+			case 'xmlhttpRequest':
+				var xhr = new XMLHttpRequest();
+				if (typeof(request.data) == 'undefined') {
+					request.data = '';
+				}
+				xhr.open(request.method, request.url, true);
+				if (request.method == "POST") {
+					xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+					xhr.setRequestHeader("Content-length", request.data.length);
+					xhr.setRequestHeader("Connection", "close");					
+				}
+				xhr.onreadystatechange = function() {
+				  if (xhr.readyState == 4) {
+					var resp = {
+						responseText: xhr.responseText,
+						url: request.url
+					};
+					var passBack = {
+						msgType: 'xmlhttpRequest',
+						callbackID: request.callbackID,
+						data: resp
+					}
+					event.source.postMessage(passBack);
+				  }
+				}
+				xhr.send(request.data);
+				break;
+			case 'openLinkInNewTab':
+				var focus = (request.focus == true);
+				thisLinkURL = request.linkURL;
+				if (thisLinkURL.toLowerCase().substring(0,4) != 'http') {
+					(thisLinkURL.substring(0,1) == '/') ? thisLinkURL = 'http://www.reddit.com' + thisLinkURL : thisLinkURL = location.href + thisLinkURL;
+					
+				}
+				opera.extension.tabs.create({url: thisLinkURL, focused: focus});
+				var passBack = {
+					msgType: 'openLinkInNewTab',
+					data: { status: 'success' }
+				}
+				event.source.postMessage(passBack);
+				break;
+			case 'localStorage':
+				switch (request.operation) {
+					case 'getItem':
+						var passBack = {
+							msgType: 'localStorage',
+							callbackID: request.callbackID,
+							key: request.itemName,
+							value: localStorage.getItem(request.itemName)
+						}
+						event.source.postMessage(passBack);
+						break;
+					case 'removeItem':
+						localStorage.removeItem(request.itemName);
+						var passBack = {
+							msgType: 'localStorage',
+							callbackID: request.callbackID,
+							key: request.itemName,
+							value: null
+						}
+						event.source.postMessage(passBack);
+						break;
+					case 'setItem':
+						localStorage.setItem(request.itemName, request.itemValue);
+						var passBack = {
+							msgType: 'localStorage',
+							callbackID: request.callbackID,
+							key: request.itemName,
+							value: request.itemValue
+						}
+						event.source.postMessage(passBack);
+						break;
+				}
+				break;
+			default:
+				var passBack = {
+					msgType: '',
+					data: { status: 'unrecognized request type' }
+				}
+				event.source.postMessage(passBack);
+				break;
+		}
+	}
+}, false);
+</script>

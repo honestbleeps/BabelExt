@@ -1,0 +1,58 @@
+<html>
+<head>
+	<script>
+	
+	function respondToMessage (msgEvent) {
+		var request = msgEvent.message;
+		request.requestType = msgEvent.name;
+		switch(request.requestType) {
+			case 'xmlhttpRequest':
+				var xhr = new XMLHttpRequest();
+				xhr.XHRID = msgEvent.message.XHRID;
+				xhr.open(request.method, request.url, true);
+				if (request.method == "POST") {
+					xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+				}
+				xhr.onreadystatechange = function() {
+				  if (xhr.readyState == 4) {
+					sendResponse(xhr, msgEvent);
+				  }
+				}
+				xhr.send(request.data);
+				break;
+			case 'openLinkInNewTab':
+				var focus = (request.button == true) ? 'foreground' : 'background';
+				thisLinkURL = request.linkURL;
+				if (thisLinkURL.toLowerCase().substring(0,4) != 'http') {
+					(thisLinkURL.substring(0,1) == '/') ? thisLinkURL = 'http://www.reddit.com' + thisLinkURL : thisLinkURL = location.href + thisLinkURL;
+				}
+				var linkTab = safari.application.activeBrowserWindow.openTab(focus);
+				linkTab.url = thisLinkURL;
+				sendResponse({status: "success"}, msgEvent);
+				break;
+			case 'localStorage':
+				switch (request.operation) {
+					case 'getItem':
+						sendResponse({status: true, key: request.itemName, value: localStorage.getItem(request.itemName)}, msgEvent);
+						break;
+					case 'removeItem':
+						localStorage.removeItem(request.itemName);
+						sendResponse({status: true, value: null}, msgEvent);
+						break;
+					case 'setItem':
+						localStorage.setItem(request.itemName, request.itemValue);
+						sendResponse({status: true, key: request.itemName, value: request.itemValue}, msgEvent);
+						break;
+				}
+				break;
+			default:
+				sendResponse({status: "unrecognized request type"}, msgEvent);
+		}
+	};
+	function sendResponse(data, event) {
+		event.target.page.dispatchMessage(event.name, data);
+	}
+	safari.application.addEventListener("message",respondToMessage,false);
+	</script>
+</head>
+</html>
