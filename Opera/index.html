@@ -32,19 +32,14 @@ opera.extension.addEventListener( "message", function( event ) {
 				}
 				xhr.send(request.data);
 				break;
-			case 'openLinkInNewTab':
-				var focus = (request.focus == true);
-				thisLinkURL = request.linkURL;
-				if (thisLinkURL.toLowerCase().substring(0,4) != 'http') {
-					(thisLinkURL.substring(0,1) == '/') ? thisLinkURL = 'http://www.reddit.com' + thisLinkURL : thisLinkURL = location.href + thisLinkURL;
-					
-				}
-				opera.extension.tabs.create({url: thisLinkURL, focused: focus});
+			case 'createTab':
+				var focus = (request.focus != true);
+				opera.extension.tabs.create({url: request.url, focused: focus});
 				var passBack = {
-					msgType: 'openLinkInNewTab',
+					msgType: 'createTab',
 					data: { status: 'success' }
 				}
-				event.source.postMessage(passBack);
+				// event.source.postMessage(passBack);
 				break;
 			case 'localStorage':
 				switch (request.operation) {
