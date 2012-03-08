@@ -82,6 +82,11 @@ pageMod.PageMod({
 				}
 				
 				break;
+			case 'createTab':
+				var focus = (request.background != true);
+				tabs.open({url: request.url, inBackground: !focus });
+				worker.postMessage({status: "success"});
+				break;
 			case 'localStorage':
 				switch (request.operation) {
 					case 'getItem':

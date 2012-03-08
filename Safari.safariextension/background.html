@@ -20,14 +20,10 @@
 				}
 				xhr.send(request.data);
 				break;
-			case 'openLinkInNewTab':
-				var focus = (request.button == true) ? 'foreground' : 'background';
-				thisLinkURL = request.linkURL;
-				if (thisLinkURL.toLowerCase().substring(0,4) != 'http') {
-					(thisLinkURL.substring(0,1) == '/') ? thisLinkURL = 'http://www.reddit.com' + thisLinkURL : thisLinkURL = location.href + thisLinkURL;
-				}
+			case 'createTab':
+				var focus = (request.background != true) ? 'foreground' : 'background';
 				var linkTab = safari.application.activeBrowserWindow.openTab(focus);
-				linkTab.url = thisLinkURL;
+				linkTab.url = request.url;
 				sendResponse({status: "success"}, msgEvent);
 				break;
 			case 'localStorage':
