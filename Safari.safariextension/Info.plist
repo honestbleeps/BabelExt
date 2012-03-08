@@ -43,7 +43,7 @@
 		<dict>
 			<key>Allowed Domains</key>
 			<array>
-				<string>*.babelext.com</string>
+				<string>www.babelext.com</string>
 			</array>
 			<key>Include Secure Pages</key>
 			<true/>
@@ -51,8 +51,6 @@
 			<string>Some</string>
 		</dict>
 	</dict>
-	<key>Update Manifest URL</key>
-	<string>http://example.com/your_update_url_here</string>
 	<key>Website</key>
 	<string>http://www.babelext.com</string>
 </dict>
