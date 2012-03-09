@@ -1,6 +1,7 @@
 // Import the APIs we need.
 var pageMod = require("page-mod");
-var Request = require('request').Request;
+var Request = require("request").Request;
+var notifications = require("notifications");
 var self = require("self"); 
 var tabs = require("tabs");
 var ss = require("simple-storage");
@@ -86,6 +87,17 @@ pageMod.PageMod({
 				var focus = (request.background != true);
 				tabs.open({url: request.url, inBackground: !focus });
 				worker.postMessage({status: "success"});
+				break;
+			case 'createNotification':
+				if (!request.icon) {
+					// if no icon specified, make a single pixel empty gif so we don't get a broken image link.
+					request.icon = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==';
+				}
+				notifications.notify({
+				  title: request.title,
+				  text: request.text,
+				  iconURL: request.icon
+				});
 				break;
 			case 'localStorage':
 				switch (request.operation) {

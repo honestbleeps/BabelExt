@@ -1,0 +1,60 @@
+<html>
+<head>
+	<style>
+		* {
+			margin: 0;
+			padding: 0;
+		}
+		BODY {
+			font-family: Arial;
+			font-size: 12px;
+			color: #444444;
+		}
+		.popoverIcon IMG {
+			max-width: 32px;
+			max-height: 32px;
+			margin-right: 5px;
+		}
+		.popoverIcon {
+			float: left;
+		}
+		.popoverTitle {
+			font-weight: bold;
+		}
+		#notificationList {
+			margin: auto;
+			width: 98%;
+		}
+		#notificationList li {
+			padding: 5px;
+			list-style-type: none;
+			overflow: auto;
+			border: 1px solid #cccccc;
+			margin-bottom: 5px;
+		}
+		.clear {
+			clear: both;
+		}
+	</style>
+	<script>
+		function renderNotifications(notifications) {
+			// to debug from here, send messages to console.log as follows:
+			// safari.extension.globalPage.contentWindow.console.log();
+			if (notifications.length > 0) {
+				document.getElementById('notificationList').innerHTML = '';
+				var list = '';
+				for (i in notifications) {
+					list += '<li><div class="popoverIcon"><img src="'+notifications[i].icon+'"></div><div class="popoverTitle">'+notifications[i].title+'</div><div class="popoverText">'+notifications[i].text+'</div><div class="clear"></div></li>';
+				}
+				document.getElementById('notificationList').innerHTML = list;
+			} else {
+				document.getElementById('notificationList').innerHTML = '<li>No notifications...</li>';
+			}
+		}
+	</script>
+</head>
+<body>
+	<ul id="notificationList">
+	</ul>
+</body>
+</html>

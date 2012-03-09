@@ -33,6 +33,18 @@
 					chrome.tabs.create({url: request.url, selected: focus, index: newIndex});
 					sendResponse({status: "success"});
 					break;
+				case 'createNotification':
+		          if (!request.icon) {
+		          	// if no icon specified, make a single pixel empty gif so we don't get a broken image link.
+		          	request.icon = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==';
+		          }
+		          var notification = window.webkitNotifications.createNotification(
+		            request.icon,  // icon url - can be relative
+		            request.title,  // notification title
+		            request.text  // notification body text
+		          );
+		          notification.show();
+		          break;
 				case 'localStorage':
 					switch (request.operation) {
 						case 'getItem':
