@@ -41,6 +41,21 @@ opera.extension.addEventListener( "message", function( event ) {
 				}
 				// event.source.postMessage(passBack);
 				break;
+			case 'createNotification':
+				// do stuff.
+				notifications.push({
+					icon: request.icon,
+					title: request.title,
+					text: request.text
+				});
+				// reload popup.
+				notificationPopup.popup.href = "notification.html";
+				setTimeout(function() {
+					notificationPopup.badge.display = 'block';
+					notificationPopup.badge.textContent = notifications.length;
+					notificationPopup.popup.href = "notification.html?new";
+				}, 300)
+				break;
 			case 'localStorage':
 				switch (request.operation) {
 					case 'getItem':
@@ -84,4 +99,28 @@ opera.extension.addEventListener( "message", function( event ) {
 		}
 	}
 }, false);
+// empty array of notifications...
+var notifications = [];
+var ToolbarUIItemProperties = {
+	disabled: false,
+	title: "Button Example",
+	icon: "notification.png",
+	badge: {
+		display: "none",
+		textContent: "0",
+		color: "white",
+		backgroundColor: "rgba(211, 0, 4, 1)"
+	},
+	popup: {
+		href: "notification.html",
+		width: 400,
+		height: 200
+	}
+}
+var notificationPopup = opera.contexts.toolbar.createItem(ToolbarUIItemProperties);
+var popupState = false;
+notificationPopup.onclick = function(){ 
+	opera.postError('popupState: ' + ToolbarUIItemProperties.disabled);
+};
+opera.contexts.toolbar.addItem(notificationPopup);
 </script>
