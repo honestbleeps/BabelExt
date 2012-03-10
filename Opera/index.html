@@ -50,11 +50,9 @@ opera.extension.addEventListener( "message", function( event ) {
 				});
 				// reload popup.
 				notificationPopup.popup.href = "notification.html";
-				setTimeout(function() {
-					notificationPopup.badge.display = 'block';
-					notificationPopup.badge.textContent = notifications.length;
-					notificationPopup.popup.href = "notification.html?new";
-				}, 300)
+				notificationPopup.badge.display = 'block';
+				notificationPopup.badge.textContent = notifications.length;
+				notificationPopup.popup.href = "notification.html?new";
 				break;
 			case 'localStorage':
 				switch (request.operation) {
@@ -99,6 +97,15 @@ opera.extension.addEventListener( "message", function( event ) {
 		}
 	}
 }, false);
+
+opera.extension.ondisconnect = function(event)  {
+	if (event.origin.indexOf('/notification.html') != -1) {
+		// popup has been closed, clear out the badge and new count.
+		notifications = [];
+		notificationPopup.badge.textContent = '0';
+		notificationPopup.badge.display = 'none';
+	}
+};
 // empty array of notifications...
 var notifications = [];
 var ToolbarUIItemProperties = {
