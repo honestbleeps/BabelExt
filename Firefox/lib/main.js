@@ -43,8 +43,6 @@ pageMod.PageMod({
 		detachWorker(this, workers);
 		// console.log('worker detached, total now: ' + workers.length);
     });
-	// console.log('total workers: ' + workers.length);
-	// worker.postMessage('init');
 
 	worker.on('message', function(data) {
 		var request = data;
@@ -102,15 +100,32 @@ pageMod.PageMod({
 			case 'localStorage':
 				switch (request.operation) {
 					case 'getItem':
-						worker.postMessage({status: true, key: request.itemName, value: localStorage.getItem(request.itemName)});
+						worker.postMessage({
+							name: 'localStorage',
+							callbackID: request.callbackID,
+							status: true, 
+							key: request.itemName, 
+							value: localStorage.getItem(request.itemName)
+						});
 						break;
 					case 'removeItem':
 						localStorage.removeItem(request.itemName);
-						worker.postMessage({status: true, key: request.itemName, value: null});
+						worker.postMessage({
+							name: 'localStorage',
+							callbackID: request.callbackID,
+							status: true, 
+							value: null
+						});
 						break;
 					case 'setItem':
 						localStorage.setItem(request.itemName, request.itemValue);
-						worker.postMessage({status: true, key: request.itemName, value: request.itemValue});
+						worker.postMessage({
+							name: 'localStorage',
+							callbackID: request.callbackID,
+							status: true, 
+							key: request.itemName, 
+							value: request.itemValue
+						});
 						break;
 				}
 				break;

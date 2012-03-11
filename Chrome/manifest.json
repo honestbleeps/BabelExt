@@ -7,7 +7,7 @@
 	"content_scripts": [
 		{
 			"matches": [
-				"http://www.babelext.com/*"
+				"http://babelext.com/*"
 			],
 			"js": ["extension.js"] // add others here if you like, i.e. jquery...
 		}
