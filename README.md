@@ -18,6 +18,9 @@ with extension development.  The transition from Greasemonkey development to bro
 extension development wasn't too difficult - but there are a few nuances in each
 browser that are a bit of a pain to circumvent if you're in a "Greasemonkey mindset"
 
+BabelExt is definitely more suited for developers wanting to create "content enhancement"
+extensions that enhance websites.  It's not made for creating addons such as AdBlock Plus, etc.
+
 ### What does BabelExt do to help me? ###
 
 BabelExt takes care of commonly used functionality that you might want to perform
@@ -58,7 +61,11 @@ work.
 In other OSes, you probably know how to do this on your own - read makelinks.bat in a
 text editor to see what directories to link where.
 
-**IMPORTANT NOTE:** Safari has a "security feature" that is not documented, gives no user
+**IMPORTANT OPERA NOTE:** Note that the Opera js file has .user.js in it - that's because without this,
+@include and @exclude directives will be ignored and your script will run on every page on
+the internet!
+
+**IMPORTANT SAFARI NOTE:** Safari has a "security feature" that is not documented, gives no user
 feedback at all, and can be a HUGE time sink if you don't know about it!  If you have any
 files in your extension folder that are symlinks, Safari will **silently** ignore them.
 With Safari, a hard link will work, but a symbolic link will not.  If you made the links
