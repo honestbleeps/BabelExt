@@ -25,8 +25,7 @@ BabelExt takes care of commonly used functionality that you might want to perfor
 in content-script-like extension.  Some of these things seem simple, but each browser
 has its own function calls and way of working, including, but not limited to:
 
-- Accessing and controlling browser windows
-- Accessing and ontrolling tabs (i.e. opening a link in a new one and choosing if it's focused)
+- Accessing and controlling tabs (i.e. opening a link in a new one and choosing if it's focused)
 - Cross domain http requests (extensions require)
 - Storing data (using HTML5 localStorage or similar/equivalent engines)
 - Triggering notifications (desktop or browser, depending on the browser's particular level of support)
