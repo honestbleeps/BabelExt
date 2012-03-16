@@ -1,9 +1,7 @@
-### NOTE: If you've just stumbled across this repo for some reason, it's not ready yet. ;-) ###
-
 ### What is BabelExt? ###
 
 BabelExt is a library (or perhaps more of a boilerplate) meant to simplify the
-development of cross-browser extensions for the following browsers:
+development of cross-browser "userscript" style extensions for the following browsers:
 
 - Chrome
 - Firefox
@@ -31,23 +29,28 @@ has its own function calls and way of working, including, but not limited to:
 - Accessing and ontrolling tabs (i.e. opening a link in a new one and choosing if it's focused)
 - Cross domain http requests (extensions require)
 - Storing data (using HTML5 localStorage or similar/equivalent engines)
-- Adding URLs to history (to mark visited)
-	- Note: this is a bit of a hack in all non-Chrome browsers...
 - Triggering notifications (desktop or browser, depending on the browser's particular level of support)
+- Adding URLs to history (to mark links as visited)
+	- Note: this is a bit of a hack in all non-Chrome browsers...
+- Adding CSS to the page
 
 ### What does BabelExt NOT do? ###
 
 Well, a lot! Most things, in fact! However, I have some clear goals, and some clear
 things I'm probably not interested in adding to BabelExt... Specifically, it's geared
 towards assisting in content script development - extensions that enhance specific
-websites or functionality on the web.
+websites or functionality on the web.  For this reason, functionality that is not supported
+by one or more of the 4 BabelExt browsers (Chrome, Firefox, Opera, Safari) may not be added
+to BabelExt.
 
-It's not meant to handle building each browser's native settings consoles/panels, etc.
+BabelExt also isn't meant to handle building each browser's native settings consoles/panels, etc.
 They're just too different from each other to try and abstract into a nice little package,
 and with the 4 supported browsers all handling modern HTML/CSS/Javascript so well - it makes
 sense (to me, anyhow) to build settings consoles and the like using those technologies.
 
-That's what I did with Reddit Enhancement Suite, and it has worked rather well.
+That's what I did with Reddit Enhancement Suite, and it has worked rather well. I am considering
+adding the automatic form rendering code from RES into BabelExt, but I will need to devote some
+thought to how to make it more universally useful.
 
 ### Great, now how do I get started? ###
 
