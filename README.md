@@ -8,6 +8,8 @@ development of cross-browser "userscript" style extensions for the following bro
 - Opera
 - Safari
 
+You can see a "kitchen sink" demonstration at [http://BabelExt.com/demo/](http://BabelExt.com/demo/)
+
 ### Who is BabelExt for? ###
 
 It's likely that BabelExt will appeal most to either new extension developers, or
