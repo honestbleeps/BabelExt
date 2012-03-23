@@ -22,7 +22,7 @@
 		#container{margin:0 auto;padding:1em;width:350px;text-align:left;}
 		p#fm-intro{margin:0;}
 		input[type=checkbox] { width: 20px; margin-left: 94px; }
-		input[type=button] { float: right; }
+		input[type=submit] { float: right; }
 		form { clear: both; margin-bottom: 10px; overflow: auto; }
 		#container {
 			display: none;
@@ -37,12 +37,19 @@
 	<h1>BabelExt Kitchen Sink Demos</h1>
 
 	<div id="installBabelExt">
-		This demonstration requires that you have the BabelExt extension installed in your browser.  For the moment, this needs to be acquired and compiled from <a target="_blank" href="http://github.com/honestbleeps/BabelExt">the Github repo</a>, but I will update this page with individual demo links later on for easier download.
+		This demonstration requires that you have the BabelExt extension installed in your browser.  You can always acquire and compile the very latest from <a target="_blank" href="http://github.com/honestbleeps/BabelExt">the Github repo</a>, but you can also download compiled versions here for each browser:
+
+		<ul>
+			<li><a href="BabelExt.crx">Chrome</a></li>
+			<li><a href="BabelExt.xpi">Firefox</a></li>
+			<li><a href="BabelExt.oex">Opera</a></li>
+			<li><a href="BabelExt.safariextz">Safar</a></li>
+		</ul>
 	</div>
 
 	<div id="container">
 		<div class="featureContainer" id="save">
-			<form id="saveForm">
+			<form id="setValueForm">
 				<legend>
 					Save a key...
 				</legend>
@@ -54,11 +61,11 @@
 					<label for="value">value</label>
 					<input type="text" name="value" id="setValue" value="">
 				</fieldset>
-				<input type="button" name="setValue" value="Set Value" id="setValueButton">
+				<input type="submit" name="setValue" value="Set Value" id="setValueButton">
 			</form>
 		</div>
 		<div class="featureContainer" id="load">
-			<form id="getForm">
+			<form id="getValueForm">
 				<legend>
 					Load a key...
 				</legend>
@@ -67,11 +74,11 @@
 					<input type="text" name="value"  id="getKey" value="">
 					<label for="retrievedvalue">value is:</label><div id="retreivedvalue"></div>
 				</fieldset>
-				<input type="button" name="getValue" value="Get Value" id="getValueButton">
+				<input type="submit" name="getValue" value="Get Value" id="getValueButton">
 			</form>
 		</div>
 		<div class="featureContainer" id="tabCreate">
-			<form id="tabCreateForm">
+			<form id="createTabForm">
 				<legend>
 					Create a tab...
 				</legend>
@@ -81,11 +88,11 @@
 						<input type="checkbox" name="background" id="background" value="1"> Background
 					</div>
 				</fieldset>
-				<input type="button" name="createTab" id="createTabButton" value="Create Tab">
+				<input type="submit" name="createTab" id="createTabButton" value="Create Tab">
 			</form>
 		</div>
 		<div class="featureContainer" id="notificationCreate">
-			<form id="notificationForm">
+			<form id="createNotificationForm">
 				<legend>
 					Create a notification
 				</legend>
@@ -101,7 +108,7 @@
 					<label for="text">icon (url)</label>
 					<input type="text" name="icon" id="notificationIcon" value="http://www.babelext.com/images/exampleicon.png">
 				</fieldset>
-				<input type="button" name="createNotification" value="Create notification" id="createNotificationButton">
+				<input type="submit" name="createNotification" value="Create notification" id="createNotificationButton">
 			</form>
 		</div>
 		<div class="featureContainer" id="historyAdd">
@@ -112,7 +119,7 @@
 				<fieldset>
 					<label for="historyurl">historyurl</label> <input type="text" name="historyurl" id="historyurl" value="">
 				</fieldset>
-				<input type="button" name="historyAdd" id="historyAddButton" value="Add To History">
+				<input type="submit" name="historyAdd" id="historyAddButton" value="Add To History">
 			</form>
 		</div>
 		<div class="featureContainer" id="cssAdd">
@@ -123,7 +130,7 @@
 				<fieldset>
 					<label for="css">css</label> <textarea type="text" name="css" id="css" value="">input { border: 1px solid red; }</textarea>
 				</fieldset>
-				<input type="button" name="cssAdd" id="cssAddButton" value="Add CSS to page">
+				<input type="submit" name="cssAdd" id="cssAddButton" value="Add CSS to page">
 			</form>
 		</div>
 	</div>
