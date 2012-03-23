@@ -9,7 +9,7 @@
 			"matches": [
 				"http://babelext.com/*"
 			],
-			"js": ["extension.js"] // add others here if you like, i.e. jquery...
+			"js": ["BabelExt.js", "extension.js"] // add others here if you like, i.e. jquery...
 		}
 	],
 	"icons": {
