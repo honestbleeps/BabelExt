@@ -2,7 +2,7 @@
 	"name": "BabelExt Extension",
 	"version": "0.9",
 	"description": "An extension created with BabelExt - www.babelext.com",
-	"update_url": "http://example.com/your_update_url_here",
+	"update_url": "http://babelext.com/update-chrome.php",
 	"background_page": "background.html",
 	"content_scripts": [
 		{
