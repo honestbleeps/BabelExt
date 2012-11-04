@@ -1,3 +1,7 @@
+### LICENSE ###
+
+MIT (X11) license. See LICENSE.txt
+
 ### What is BabelExt? ###
 
 BabelExt is a library (or perhaps more of a boilerplate) meant to simplify the
