@@ -1,9 +1,12 @@
 {
 	"name": "BabelExt Extension",
 	"version": "0.9",
+	"manifest_version": 2,
 	"description": "An extension created with BabelExt - www.babelext.com",
 	"update_url": "http://babelext.com/update-chrome.php",
-	"background_page": "background.html",
+	"background": {
+		"scripts": ["background.js"]
+	},
 	"content_scripts": [
 		{
 			"matches": [
