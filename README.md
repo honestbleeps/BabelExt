@@ -93,7 +93,7 @@ recognized by Safari. Don't remove that from the name!
 
 - Click "load unpacked extension" and choose the Chrome directory
 
-- You're good to go! If you just want to try out the BabelExt kitchen sink demo, navigate to [http://babelext.com/demo.html](http://babelext.com/demo.html)
+- You're good to go! If you just want to try out the BabelExt kitchen sink demo, navigate to [http://babelext.com/demo/](http://babelext.com/demo/)
 
 - Further Chrome development information can be found at [http://code.google.com/chrome/extensions/index.html](http://code.google.com/chrome/extensions/index.html)
 
@@ -105,7 +105,7 @@ recognized by Safari. Don't remove that from the name!
 
 - Navigate to the Firefox directory under BabelExt, and type: cfx run
 
-- You're good to go! If you just want to try out the BabelExt kitchen sink demo, navigate to [http://babelext.com/demo.html](http://babelext.com/demo.html)
+- You're good to go! If you just want to try out the BabelExt kitchen sink demo, navigate to [http://babelext.com/demo/](http://babelext.com/demo/)
 
 - Further Firefox development information can be found at [https://addons.mozilla.org/en-US/developers/docs/sdk/latest/](https://addons.mozilla.org/en-US/developers/docs/sdk/latest/)
 
@@ -115,7 +115,7 @@ recognized by Safari. Don't remove that from the name!
 
 - Find the config.xml file in the Opera directory of BabelExt, and drag it to the Extensions window
 
-- You're good to go! If you just want to try out the BabelExt kitchen sink demo, navigate to [http://babelext.com/demo.html](http://babelext.com/demo.html)
+- You're good to go! If you just want to try out the BabelExt kitchen sink demo, navigate to [http://babelext.com/demo/](http://babelext.com/demo/)
 
 - Further Opera development information can be found at [http://dev.opera.com/addons/extensions/](http://dev.opera.com/addons/extensions/)
 
@@ -132,6 +132,6 @@ recognized by Safari. Don't remove that from the name!
 
 - Choose the Safari.safariextension folder from BabelExt
 
-- You're good to go! If you just want to try out the BabelExt kitchen sink demo, navigate to [http://babelext.com/demo.html](http://babelext.com/demo.html)
+- You're good to go! If you just want to try out the BabelExt kitchen sink demo, navigate to [http://babelext.com/demo/](http://babelext.com/demo/)
 
 - Further Safari development information can be found at [https://developer.apple.com/library/safari/#documentation/Tools/Conceptual/SafariExtensionGuide/Introduction/Introduction.html](https://developer.apple.com/library/safari/#documentation/Tools/Conceptual/SafariExtensionGuide/Introduction/Introduction.html)
