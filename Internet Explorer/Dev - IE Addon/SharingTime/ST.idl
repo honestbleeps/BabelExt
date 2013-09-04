@@ -1,0 +1,36 @@
+// ST.idl : IDL source for ST
+//
+
+// This file will be processed by the MIDL tool to
+// produce the type library (ST.tlb) and marshalling code.
+
+import "oaidl.idl";
+import "ocidl.idl";
+
+[
+	object,
+	uuid(3A97156A-4FE9-40f1-9427-D81B24FEFFD7),
+	dual,
+	nonextensible,
+	helpstring("ISTI Interface"),
+	pointer_default(unique)
+]
+interface ISTI : IDispatch{
+};
+[
+	uuid(331AE64E-2726-47a1-9CAF-42E31502CAF4),
+	version(1.0),
+	helpstring("ST 1.0 Type Library")
+]
+library STLib
+{
+	importlib("stdole2.tlb");
+	[
+		uuid(5BF86DC2-EA0C-4ace-BB3F-3CAD69363D17),
+		helpstring("SharingTime")
+	]
+	coclass STI
+	{
+		[default] interface ISTI;
+	};
+};
