@@ -1,11 +1,34 @@
 #!/bin/sh
+files=("BabelExt.js" "extension.js")
+paths=("Chrome" "XPI/data" "Opera" "Safari.safariextension")
 
-ln -sv ../lib/extension.js ./Chrome/extension.js
-ln -sv ../../lib/extension.js ./Opera/includes/extension.user.js
-ln -sv ../../lib/extension.js ./Firefox/data/extension.js
-ln -v ./lib/extension.js ./Safari.safariextension/extension.js 
+for i in "${files[@]}"
+do
+        for j in "${paths[@]}"
+        do
+                if [ "$j" == "Opera" ];
+                then
+                        if [[ "$i" == *.user.js || "$i" == *.css ]];
+                        then
+                                dest="./$j/includes/"
+                        else
+                                dest="./$j/modules/"
+                        fi
+                else
+                        dest="./$j/"
+                fi
+                echo "Re-linking:" $dest$i
+                if [ -f $dest$i ];
+                then
+                        rm $dest$i
+                fi
 
-ln -sv ../lib/BabelExt.js ./Chrome/BabelExt.js
-ln -sv ../../lib/BabelExt.js ./Opera/includes/BabelExt.js
-ln -sv ../../lib/BabelExt.js ./Firefox/data/BabelExt.js
-ln -v ./lib/BabelExt.js ./Safari.safariextension/BabelExt.js
+                if [ "clean" != "$1" ];
+                then
+                        mkdir -p $dest
+                        ln ./lib/$i $dest
+                fi
+        done
+done
+
+
