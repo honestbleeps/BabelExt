@@ -73,6 +73,9 @@
 						break;
 				}
 				break;
+			case "contextMenus.create":
+				contextMenuItems[request.obj.onclick] = request.obj;
+				break;
 			default:
 				sendResponse({status: "unrecognized request type"}, msgEvent);
 		}
@@ -91,6 +94,7 @@
 			event.target.badge = notifications.length;
 		}
 	}
+
 	function popoverHandler(event) {
 		// ok we rendered the HTML, now we can clear out the notifications array and badge..
 			// event.target.popover.contentWindow.document.getElementById('noNotifications').innerHTML = 'THIS IS A TEST';
@@ -107,6 +111,33 @@
 	safari.application.addEventListener("validate", validateHandler, true);
 	safari.application.addEventListener("popover", popoverHandler, true);
 
+	// object to store items added to the context menu
+	var contextMenuItems = {};
+
+	var contextMenuHandler = function(event) {
+	  var item;
+	  for (key in contextMenuItems) {
+		item = contextMenuItems[key];
+		event.contextMenu.appendContextMenuItem(item.onclick, item.title);
+	  }
+	};
+	var performCommand = function(event) {
+		// send the item id back to the script where the callback function is
+		// stored and can be run
+		if (!event.target.page) {
+			event.target.page = safari.application.activeBrowserWindow.activeTab.page;
+		}
+		if (!event.name) {
+			event.name = "contextMenu.click";
+		}
+		sendResponse({
+			name: "contextMenu.click",
+			obj: event
+		}, event);
+	};
+
+	safari.application.addEventListener("contextmenu", contextMenuHandler, false);
+	safari.application.addEventListener("command", performCommand, false);
 	</script>
 </head>
 </html>
