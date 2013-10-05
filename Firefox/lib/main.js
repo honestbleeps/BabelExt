@@ -1,23 +1,26 @@
 // Import the APIs we need.
+
 var pageMod = require("page-mod");
 var Request = require("request").Request;
 var notifications = require("notifications");
-var self = require("self"); 
+var self = require("self");
 var tabs = require("tabs");
 var ss = require("simple-storage");
-var workers = new Array();
+var workers = [];
+var contextMenu = require("context-menu");
+var priv = require("private-browsing");
+var windows = require("sdk/windows").browserWindows;
 
 // require chrome allows us to use XPCOM objects...
 const {Cc, Ci, Cu, Cr} = require("chrome");
-// from XPCOM, use the NSIGlobalHistory2 service...
-var historyService = Cc["@mozilla.org/browser/nav-history-service;1"] .getService(Ci.nsIGlobalHistory2)
+
+var historyService = Cc["@mozilla.org/browser/history;1"].getService(Ci.mozIAsyncHistory);
 
 // this function takes in a string (and optional charset, paseURI) and creates an nsURI object, which is required by historyService.addURI...
-function makeURI(aURL, aOriginCharset, aBaseURI) {  
-  var ioService = Cc["@mozilla.org/network/io-service;1"]
-                  .getService(Ci.nsIIOService);
-  return ioService.newURI(aURL, aOriginCharset, aBaseURI);  
-} 
+function makeURI(aURL, aOriginCharset, aBaseURI) {
+	var ioService = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
+	return ioService.newURI(aURL, aOriginCharset, aBaseURI);
+}
 
 
 function detachWorker(worker, workerArray) {
@@ -32,15 +35,13 @@ var localStorage = ss.storage;
 // for all of the other browsers...
 localStorage.getItem = function(key) {
 	return ss.storage[key];
-}
+};
 localStorage.setItem = function(key, value) {
 	ss.storage[key] = value;
-}
+};
 localStorage.removeItem = function(key) {
 	delete ss.storage[key];
-}
-
-
+};
 
 pageMod.PageMod({
   include: ["*.babelext.com"],
@@ -64,7 +65,7 @@ pageMod.PageMod({
 				var responseObj = {
 					XHRID: request.XHRID,
 					name: request.requestType
-				}
+				};
 				if (request.method == 'POST') {
 					Request({
 						url: request.url,
@@ -72,7 +73,7 @@ pageMod.PageMod({
 							responseObj.response = {
 								responseText: response.text,
 								status: response.status
-							}
+							};
 							worker.postMessage(responseObj);
 						},
 						headers: request.headers,
@@ -85,17 +86,16 @@ pageMod.PageMod({
 							responseObj.response = {
 								responseText: response.text,
 								status: response.status
-							}
+							};
 							worker.postMessage(responseObj);
 						},
 						headers: request.headers,
 						content: request.data
 					}).get();
 				}
-				
 				break;
 			case 'createTab':
-				var focus = (request.background != true);
+				var focus = (request.background !== true);
 				tabs.open({url: request.url, inBackground: !focus });
 				worker.postMessage({status: "success"});
 				break;
@@ -105,9 +105,9 @@ pageMod.PageMod({
 					request.icon = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==';
 				}
 				notifications.notify({
-				  title: request.title,
-				  text: request.text,
-				  iconURL: request.icon
+					title: request.title,
+					text: request.text,
+					iconURL: request.icon
 				});
 				break;
 			case 'localStorage':
@@ -116,8 +116,8 @@ pageMod.PageMod({
 						worker.postMessage({
 							name: 'localStorage',
 							callbackID: request.callbackID,
-							status: true, 
-							key: request.itemName, 
+							status: true,
+							key: request.itemName,
 							value: localStorage.getItem(request.itemName)
 						});
 						break;
@@ -126,7 +126,7 @@ pageMod.PageMod({
 						worker.postMessage({
 							name: 'localStorage',
 							callbackID: request.callbackID,
-							status: true, 
+							status: true,
 							value: null
 						});
 						break;
@@ -135,16 +135,44 @@ pageMod.PageMod({
 						worker.postMessage({
 							name: 'localStorage',
 							callbackID: request.callbackID,
-							status: true, 
-							key: request.itemName, 
+							status: true,
+							key: request.itemName,
 							value: request.itemValue
 						});
 						break;
 				}
 				break;
 			case 'addURLToHistory':
+				var isPrivate = priv.isPrivate(windows.activeWindow);
+				if (isPrivate) {
+					// do not add to history if in private browsing mode!
+					return false;
+				}
 				var uri = makeURI(request.url);
-				historyService.addURI(uri, false, true, null);
+				historyService.updatePlaces({
+					uri: uri,
+					visits: [{
+						transitionType: Ci.nsINavHistoryService.TRANSITION_LINK,
+						visitDate: Date.now() * 1000
+					}]
+				});
+				break;
+			case 'contextMenus.create':
+				contextMenu.Item({
+					label: request.obj.title,
+					context: contextMenu.PageContext(),
+					data: request.obj.onclick,
+					contentScript: 'self.on("click", function (node, data) {' +
+									'self.postMessage(data);' +
+									'});',
+					onMessage: function(onclick) {
+						worker.postMessage({
+							name: 'contextMenus.click',
+							callbackID: onclick
+						});
+					}
+
+				});
 				break;
 			default:
 				worker.postMessage({status: "unrecognized request type"});
@@ -154,5 +182,3 @@ pageMod.PageMod({
 	});
   }
 });
-
-
