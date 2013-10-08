@@ -61,13 +61,12 @@ thought to how to make it more universally useful.
 
 First, download all of the source from Github and put it together within a folder.
 
-In Windows, run makelinks.bat to create symlinks to extension.js - these links are not
+In Windows, run `makelinks.bat` to create symlinks to extension.js - these links are not
 handled by github, which is why you unfortuntately have to make them yourself. 
 **NOTE:** You may need to open a command prompt as Administrator for this batch file to
 work.
 
-In other OSes, you probably know how to do this on your own - read makelinks.bat in a
-text editor to see what directories to link where.
+In UNIX-based OSes, you can run `makelinks.sh`.  Note that this will make hardlinks.
 
 **IMPORTANT OPERA NOTE:** Note that the Opera js file has .user.js in it - that's because without this,
 @include and @exclude directives will be ignored and your script will run on every page on
