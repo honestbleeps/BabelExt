@@ -20,10 +20,13 @@ chrome.runtime.onMessage.addListener(
 				}
 				xhr.onreadystatechange = function() {
 					if (xhr.readyState === 4) {
-						sendResponse(xhr);
+						// Only store 'status' and 'responseText' fields and send them back.
+						var response = {status: xhr.status, responseText: xhr.responseText};
+						sendResponse(response);
 					}
 				};
 				xhr.send(request.data);
+				return true; // true must be returned here to indicate successful XHR
 				break;
 			case 'createTab':
 				var newIndex,
