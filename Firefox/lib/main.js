@@ -63,7 +63,7 @@ pageMod.PageMod({
 		switch(request.requestType) {
 			case 'xmlhttpRequest':
 				var responseObj = {
-					XHRID: request.XHRID,
+					callbackID: request.callbackID,
 					name: request.requestType
 				};
 				if (request.method == 'POST') {
