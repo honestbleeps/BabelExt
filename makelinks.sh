@@ -1,34 +1,17 @@
-#!/bin/sh
-files=("BabelExt.js" "extension.js")
-paths=("Chrome" "Firefox/data" "Opera" "Safari.safariextension")
+#!/bin/bash
 
-for i in "${files[@]}"
+while read -r MKLINK H TO FROM
 do
-        for j in "${paths[@]}"
-        do
-                if [ "$j" == "Opera" ];
-                then
-                        if [[ "$i" == *.user.js || "$i" == *.css ]];
-                        then
-                                dest="./$j/includes/"
-                        else
-                                dest="./$j/modules/"
-                        fi
-                else
-                        dest="./$j/"
-                fi
-                echo "Re-linking:" $dest$i
-                if [ -f $dest$i ];
-                then
-                        rm $dest$i
-                fi
-
-                if [ "clean" != "$1" ];
-                then
-                        mkdir -p $dest
-                        ln ./lib/$i $dest
-                fi
-        done
-done
-
-
+    if [ "$MKLINK" == "mklink" ]
+    then
+        SYMLINK=""
+        if [ "$H" != "/H" ]
+        then
+            SYMLINK="-s"
+            FROM="$TO"
+            TO="$H"
+        fi
+        rm -f "${TO//\\//}"
+        ln $SYMLINK "${FROM//\\//}" "${TO//\\//}"
+    fi
+done < makelinks.bat
