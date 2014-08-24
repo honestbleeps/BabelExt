@@ -1,5 +1,6 @@
 {
 	"name": "BabelExt Extension",
+	"author": "honestbleeps",
 	"version": "0.95",
 	"manifest_version": 2,
 	"description": "An extension created with BabelExt - www.babelext.com",
@@ -9,16 +10,12 @@
 	},
 	"content_scripts": [
 		{
-			"matches": [
-				"http://babelext.com/*"
-			],
-			"js": ["BabelExt.js", "extension.js"] // add others here if you like, i.e. jquery...
+			"matches": ["http://babelext.com/*"],
+			"js": ["BabelExt.js", "extension.js"], // add others here if you like, i.e. jquery...
+			"run_at": "document_end"
 		}
 	],
-	"icons": {
-		// "48": "icon48.png",
-		// "128": "icon128.png" 
-	},
+	"icons": {},
 	"permissions": [
 		"contextMenus",
 		"tabs",
