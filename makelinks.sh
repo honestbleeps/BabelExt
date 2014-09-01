@@ -1,6 +1,6 @@
 #!/bin/sh
 files=("BabelExt.js" "extension.js")
-paths=("Chrome" "XPI/data" "Opera" "Safari.safariextension")
+paths=("Chrome" "Firefox/data" "Opera" "Safari.safariextension")
 
 for i in "${files[@]}"
 do
