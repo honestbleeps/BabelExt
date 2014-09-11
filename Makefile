@@ -7,15 +7,14 @@ CHROME=google-chrome
 # BROWSER-NEUTRAL CONFIG VALUES
 #
 CONFIG_FILE=lib/config.txt
-ID            = $(shell sed -n -e 's/\//\\\//g' -e 's/^id  *//p' ${CONFIG_FILE})
-NAME          = $(shell sed -n -e 's/\//\\\//g' -e 's/^name  *//p' ${CONFIG_FILE})
-LICENSE       = $(shell sed -n -e 's/\//\\\//g' -e 's/^license  *//p' ${CONFIG_FILE})
-TITLE         = $(shell sed -n -e 's/\//\\\//g' -e 's/^title  *//p' ${CONFIG_FILE})
-DESCRIPTION   = $(shell sed -n -e 's/\//\\\//g' -e 's/^description  *//p' ${CONFIG_FILE})
-WEBSITE       = $(shell sed -n -e 's/\//\\\//g' -e 's/^website  *//p' ${CONFIG_FILE})
-VERSION       = $(shell sed -n -e 's/\//\\\//g' -e 's/^version  *//p' ${CONFIG_FILE})
-AUTHOR        = $(shell sed -n -e 's/\//\\\//g' -e 's/^author  *//p' ${CONFIG_FILE})
-UPDATE_CHROME = $(shell sed -n -e 's/\//\\\//g' -e 's/^update_chrome  *//p' ${CONFIG_FILE})
+ID          = $(shell sed -n -e 's/\//\\\//g' -e 's/^id  *//p' ${CONFIG_FILE})
+NAME        = $(shell sed -n -e 's/\//\\\//g' -e 's/^name  *//p' ${CONFIG_FILE})
+LICENSE     = $(shell sed -n -e 's/\//\\\//g' -e 's/^license  *//p' ${CONFIG_FILE})
+TITLE       = $(shell sed -n -e 's/\//\\\//g' -e 's/^title  *//p' ${CONFIG_FILE})
+DESCRIPTION = $(shell sed -n -e 's/\//\\\//g' -e 's/^description  *//p' ${CONFIG_FILE})
+WEBSITE     = $(shell sed -n -e 's/\//\\\//g' -e 's/^website  *//p' ${CONFIG_FILE})
+VERSION     = $(shell sed -n -e 's/\//\\\//g' -e 's/^version  *//p' ${CONFIG_FILE})
+AUTHOR      = $(shell sed -n -e 's/\//\\\//g' -e 's/^author  *//p' ${CONFIG_FILE})
 
 SCRIPT_WHEN      = $(shell sed -n -e 's/\//\\\//g' -e 's/^contentScriptWhen  *//p' ${CONFIG_FILE})
 SCRIPT_FILES     = $(shell sed -n -e 's/\//\\\//g' -e 's/^contentScriptFile  *//p' ${CONFIG_FILE})
@@ -150,7 +149,6 @@ Chrome/manifest.json: $(CONFIG_FILE)
 	    -e "s/\(\"description\": *\"\)[^\"]*\"/\1$(DESCRIPTION)\"/" \
 	    -e "s/\(\"version\": *\"\)[^\"]*\"/\1$(VERSION)\"/" \
 	    -e "s/\(\"author\": *\"\)[^\"]*\"/\1$(AUTHOR)\"/" \
-	    -e "s/\(\"update_url\": *\"\)[^\"]*\"/\1$(UPDATE_CHROME)\"/" \
 	    -e "s/\(\"matches\": *\[\"\)[^\"]*/\1$(DOMAIN_CHROME)/" \
 	    -e "s/\(\"icons\": *{\)[^\}]*/\1$(ICON_FILES_CHROME)/" -e 's/,}/ }/' \
 	    -e "s/\(\"js\": *\[\)[^]]*/\1$(SCRIPT_FILES_CHROME)/" \
