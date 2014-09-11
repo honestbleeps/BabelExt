@@ -100,7 +100,7 @@ default: makelinks.bat
 
 config: Firefox Chrome Safari.safariextension
 
-BUILD_TARGETS=build/$(NAME).crx build/$(NAME).chrome.zip build/$(NAME).nex build/$(NAME).xpi
+BUILD_TARGETS=build/$(NAME).crx build/$(NAME).chrome.zip build/$(NAME).nex build/$(NAME).xpi build/chrome-store-upload.zip
 build: $(BUILD_TARGETS)
 	@echo "\033[1;32mbuilt!\033[0m"
 
@@ -210,6 +210,9 @@ build/$(NAME).chrome.zip: build/$(NAME).crx
 	-cd "tmp/$(NAME)" && unzip -q ../../$^
 	cd tmp && zip -rq ../$@ "$(NAME)"
 	rm -rf tmp
+
+build/chrome-store-upload.zip: Chrome lib/*
+	rm -f $@ && zip -r $@ Chrome --exclude \*~ --exclude Chrome/.gitignore
 
 build/$(NAME).nex: build/$(NAME).crx
 	cp $^ $@
