@@ -150,6 +150,7 @@ Chrome/manifest.json: $(CONFIG_FILE)
 	    -e "s/\(\"version\": *\"\)[^\"]*\"/\1$(VERSION)\"/" \
 	    -e "s/\(\"author\": *\"\)[^\"]*\"/\1$(AUTHOR)\"/" \
 	    -e "s/\(\"matches\": *\[\"\)[^\"]*/\1$(DOMAIN_CHROME)/" \
+	    -e "s/\(\"permissions\": \[\).*/\1 \"$(DOMAIN_CHROME)\",/" \
 	    -e "s/\(\"icons\": *{\)[^\}]*/\1$(ICON_FILES_CHROME)/" -e 's/,}/ }/' \
 	    -e "s/\(\"js\": *\[\)[^]]*/\1$(SCRIPT_FILES_CHROME)/" \
 	    -e "s/\(\"run_at\": *\"\)[^\"]*\"/\1$(SCRIPT_WHEN_CHROME)\"/" \
