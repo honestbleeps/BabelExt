@@ -105,7 +105,8 @@ build: $(BUILD_TARGETS)
 	@echo "\033[1;32mbuilt!\033[0m"
 
 clean:
-	rm -rf $(BUILD_TARGETS) tmp/*
+	rm -rf $(BUILD_TARGETS) tmp/* Firefox/data/*
+	find Chrome/ -type f -not -name background.js -not -name manifest.json -not -name .gitignore -exec rm '{}' ';'
 
 
 #
