@@ -1,4 +1,4 @@
-.PHONY: default build config clean test
+.PHONY: default build config clean test firefox-addon-sdk-url
 
 # Change this to the name of your Chrome executable:
 CHROME=google-chrome
@@ -97,7 +97,7 @@ endif
 
 default: makelinks.bat
 	test -e build || mkdir build
-	$(MAKE) firefox-addon-sdk build
+	$(MAKE) build
 
 config: Firefox Chrome Safari.safariextension
 
@@ -191,10 +191,16 @@ Safari.safariextension: Safari.safariextension/config.xml $(patsubst %,Safari.sa
 # BUILD TARGETS:
 #
 
-firefox-addon-sdk:
-	git clone https://github.com/mozilla/addon-sdk.git $@
-	cd $@ && git checkout 1.16
-	cd $@ && git archive 1.16 python-lib/cuddlefish/_version.py | tar -xvf -
+firefox-addon-sdk-url: # check for new versions of the SDK
+	$(eval     URL:=$(shell curl --silent -I https://ftp.mozilla.org/pub/mozilla.org/labs/jetpack/jetpack-sdk-latest.tar.gz | sed -ne 's/^Location: //p'))
+	$(eval OLD_URL:=$(shell cat $@.txt || echo))
+	if [ "$(URL)" != "$(OLD_URL)" ] ; then echo "$(URL)" > $@.txt ; fi
+
+firefox-addon-sdk: firefox-addon-sdk-url.txt
+	rm -rf $@
+	curl $(shell cat $^) | tar zx
+	mv addon-sdk-*/ firefox-addon-sdk
+	touch $@
 
 build/$(NAME).crx: Chrome lib/* Chrome.pem
 	$(CHROME) --pack-extension=Chrome --pack-extension-key=Chrome.pem > /dev/null
@@ -210,7 +216,7 @@ build/$(NAME).chrome.zip: build/$(NAME).crx
 build/$(NAME).nex: build/$(NAME).crx
 	cp $^ $@
 
-build/$(NAME).xpi: Firefox Firefox/package.json lib/*
+build/$(NAME).xpi: firefox-addon-sdk-url firefox-addon-sdk Firefox Firefox/package.json lib/*
 	bash -c 'cd firefox-addon-sdk && source bin/activate && cd ../Firefox && cfx xpi'
 	mv Firefox/*.xpi $@
 
