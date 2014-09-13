@@ -31,6 +31,7 @@ contentScriptWhen early
 
 # normal settings:
 contentScriptFile extension.js
+#contentScriptFile console.js
 match_domain      babelext.com
 # uncomment the next line to match *.<match_domain>:
 # match_include_subdomains
