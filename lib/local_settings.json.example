@@ -1,0 +1,51 @@
+/*
+ * Local settings
+ * This contains settings that are specific to an installation,
+ * Rename this file to 'local_settings.json' before use
+ * 'localsettings.json' is in .gitignore because it should never go in version control
+ */
+{
+
+    // set this to release to addons.mozilla.org:
+    amo_login_info: {
+        username: 'user@example.org',
+        password: 'password123' // optional - defaults to the environment variable 'AMO_PASSWORD'
+    },
+
+    // set this to release to the Chrome store:
+    chrome_login_info: {
+
+        username: 'user@example.org'
+        password: 'password123', // optional - defaults to the environment variable 'CHROME_PASSWORD'
+
+        // "ID" string in chrome://extensions/:
+        id: "abcdefghijklmnopqrstuvwxyz012345",
+
+        /*
+         * Keys for the Chrome WebStore API.
+         * Follow the instructions here: https://developer.chrome.com/webstore/using_webstore_api
+         *
+         * Make sure to get an access token (code) manually once, to make sure it works.
+         * If you get a 401 error when you try to retrieve the token, go to APIs & auth > Consent screen
+         * in the Google Developers Console and fill in your email address and product name.
+         *
+         * Also make sure to enable the Web Store API by going to APIs & auth > APIs,
+         * browsing for "Chrome Web Store API" and changing the status to "ON"
+         */
+        "client_id"    : 'abcdefghijkl-mnopqrstuvwxyz0123456789ABCDEFGH.apps.googleusercontent.com',
+        "client_secret": "abcdefghijklm-nopqrstuvw",
+
+    },
+
+    // set this to release to the Opera extensions site:
+    opera_login_info: {
+        username: 'user@example.org',
+        password: 'password123', // optional - defaults to the environment variable 'OPERA_PASSWORD'
+        tested_on: 'Opera 25 Developer Linux' // List of versions you've tested on (see opera://about for your version)
+    }
+
+    // Command to get the changelog for your latest version.
+    // At the time of writing, this was required by Opera and hadn't yet been implemented for other browsers:
+    changelog_command: [ 'git', 'log', '--pretty=* %s', '@{u}..HEAD', '--reverse', '--first-parent' ],
+
+}

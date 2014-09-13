@@ -1,9 +1,9 @@
 {
-    "description": "An extension created with BabelExt - www.babelext.com", 
-    "license": "GPL", 
-    "author": "honestbleeps", 
-    "version": "0.95", 
-    "title": "BabelExt", 
-    "id": "jid1-h7LuK9FSeAYouw", 
+    "description": "An extension created with BabelExt - www.babelext.com",
+    "license": "GPL",
+    "author": "honestbleeps",
+    "version": "0.95",
+    "title": "BabelExt",
+    "id": "abcdef01-2345-6789-9876-543210fedcba",
     "name": "babelext_your_name_here"
 }

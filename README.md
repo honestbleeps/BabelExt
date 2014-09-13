@@ -61,12 +61,13 @@ thought to how to make it more universally useful.
 
 First, download all of the source from Github and put it together within a folder.
 
-In Windows, run `makelinks.bat` to create symlinks to extension.js - these links are not
-handled by github, which is why you unfortuntately have to make them yourself. 
-**NOTE:** You may need to open a command prompt as Administrator for this batch file to
-work.
+Then, download PhantomJS (http://phantomjs.org), which is used to build and deploy extensions.
 
-In UNIX-based OSes, you can run `makelinks.sh`.  Note that this will make hardlinks.
+In UNIX-based OSes, run `./bin/build.sh build` to build packages, and
+`./bin/build.sh release` to release them.
+
+The build system hasn't been tested under Windows yet - your best bet is probably to look at
+the shell script and write a Windows equivalent.  If it's any good, please send in a patch!
 
 **IMPORTANT OPERA NOTE:** Note that the Opera js file has .user.js in it - that's because without this,
 @include and @exclude directives will be ignored and your script will run on every page on
@@ -84,11 +85,14 @@ recognized by Safari. Don't remove that from the name!
 
 ## Instructions for loading/testing an extension in each browser ##
 
-### Chrome ###
+- You need to build the package before you start - the initial build
+  process configures some files that aren't stored in git
 
-- Click the wrench icon and choose Tools -> Extensions
+### Chrome / Opera ###
 
-- Check the "Developer Mode" checkbox
+- Go to about://extensions
+
+- Check "Developer Mode"
 
 - Click "load unpacked extension" and choose the Chrome directory
 
@@ -98,26 +102,19 @@ recognized by Safari. Don't remove that from the name!
 
 ### Firefox ###
 
-- Download the Firefox Addon SDK from [https://addons.mozilla.org/en-US/developers/builder](https://addons.mozilla.org/en-US/developers/builder)
+- Go to about:addons, click the "Tools" icon in the top-right and install the add-on from file
 
-- Follow the installation instructions there, and run the appropriate activation script (i.e. bin\activate.bat in windows)
+- Go to about:support and click the "Open Directory" to go to your profile directory
 
-- Navigate to the Firefox directory under BabelExt, and type: cfx run
+- Open the "extensions" subdirectory and look for a subdirectory matching the "id" in your settings.json file
+
+- Delete the file and replace it with a link to your extension's "firefox-unpacked" directory
+
+- Restart Firefox
 
 - You're good to go! If you just want to try out the BabelExt kitchen sink demo, navigate to [http://babelext.com/demo/](http://babelext.com/demo/)
 
 - Further Firefox development information can be found at [https://addons.mozilla.org/en-US/developers/docs/sdk/latest/](https://addons.mozilla.org/en-US/developers/docs/sdk/latest/)
-
-### Opera ###
-
-- Click Tools -> Extensions -> Manage Extensions
-
-- Find the config.xml file in the Opera directory of BabelExt, and drag it to the Extensions window
-
-- You're good to go! If you just want to try out the BabelExt kitchen sink demo, navigate to [http://babelext.com/demo/](http://babelext.com/demo/)
-
-- Further Opera development information can be found at [http://dev.opera.com/addons/extensions/](http://dev.opera.com/addons/extensions/)
-
 
 ### Safari ###
 
@@ -134,3 +131,9 @@ recognized by Safari. Don't remove that from the name!
 - You're good to go! If you just want to try out the BabelExt kitchen sink demo, navigate to [http://babelext.com/demo/](http://babelext.com/demo/)
 
 - Further Safari development information can be found at [https://developer.apple.com/library/safari/#documentation/Tools/Conceptual/SafariExtensionGuide/Introduction/Introduction.html](https://developer.apple.com/library/safari/#documentation/Tools/Conceptual/SafariExtensionGuide/Introduction/Introduction.html)
+
+## Releasing packages ##
+
+You need to release the first version of your extension by hand, because each site has slightly different requirements for their extensions.
+
+After the initial release, fill in local_settings.json and run `bin/build.js` with the "release" command to release and update metadata.

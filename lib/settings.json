@@ -1,0 +1,68 @@
+/*
+ * BROWSER-NEUTRAL CONFIGURATION FILE
+ * (copied to browser-specific files during build)
+ */
+{
+    // In Linux, you can make a GUID by running `uuidgen` on the command line:
+    "id":            "abcdef01-2345-6789-9876-543210fedcba",
+
+    // General config parameters
+    "name":        "babelext_your_name_here",
+    "title":       "BabelExt",
+    "description": "An extension created with BabelExt - www.babelext.com",
+    "license":     "GPL",
+    "author":      "honestbleeps",
+    "version":     "0.95",
+    "website":     "http://babelext.com",
+    "icons": {
+        /*
+        16:     "icon-16.png",
+        32:     "icon-32.png",
+        48:     "icon-48.png",
+        64:     "icon-64.png",
+        128:    "icon-128.png"
+    */
+    },
+
+    "long_description":
+        "This extension uses the BabelExt cross-browser development framework.\n" +
+        "Go to http://www.babelext.com for more information.",
+
+    // userscript config parameters:
+
+    /*
+     * contentScriptWhen can be 'early', 'middle' or 'late'.
+     * different browsers interpret this in different ways, but in general:
+     * * 'early' runs at the earliest point supported by the browser (possibly before the DOM exists)
+     * * 'middle' guarantees the DOM exists, but might run while the page is still loading
+     * * 'late' guarantees the scripts are run aft the page finishes loading
+     */
+    "contentScriptWhen": "middle",
+
+    "contentScriptFiles": [ "extension.js" ],
+    "match_domain":       "babelext.com",
+    // whether to match *.<match_domain>:
+    "match_include_subdomains": false,
+
+    "environment_specific": {
+        /*
+         * If you set the "ENVIRONMENT" environment variable,
+         * variables from the relevant block will be used:
+         */
+        "development": {
+            "contentScriptFiles": [ "console.js" ],
+        },
+
+        "test": {
+            "contentScriptFiles": [ "test-helper.js" ],
+        },
+
+        "production": {
+            "match_domain":       "babelext.com",
+        }
+
+    },
+
+    "firefox_max_version": '32.*'
+
+}
