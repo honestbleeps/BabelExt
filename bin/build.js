@@ -302,7 +302,14 @@ try {
     phantom.exit(1);
 }
 if ( system.env.hasOwnProperty('ENVIRONMENT') ) {
-    var environment_specific = settings.environment_specific[ system.env.ENVIRONMENT ] || [];
+    var environment_specific = settings.environment_specific[ system.env.ENVIRONMENT ];
+    if ( !environment_specific ) {
+        console.log(
+            'Please specify one of the following build environments: ' +
+            Object.keys(settings.environment_specific).join(' ')
+        );
+        phantom.exit(1);
+    }
     Object.keys(environment_specific)
         .forEach(function(property, n, properties) {
             settings[ property ] =
