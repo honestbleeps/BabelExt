@@ -444,7 +444,7 @@ function build_firefox() {
         'Firefox/lib/settings.js',
         'exports.include = ["http://' + settings.pretty_domain + '/*","https://' + settings.pretty_domain + '/*"];\n' +
         'exports.contentScriptWhen = "' + when_string[settings.contentScriptWhen] + '";\n' +
-        'exports.contentScriptFile = ' + JSON.stringify( settings.contentScriptFiles.map(function(file) { return "self.data.url('"+file+"')" }) ) + ";\n"
+        'exports.contentScriptFile = ' + JSON.stringify(settings.contentScriptFiles) + ";\n"
         ,
         'w'
     );
