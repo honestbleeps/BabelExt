@@ -329,6 +329,24 @@ settings.contentScriptFiles.unshift('BabelExt.js');
 settings.pretty_domain = ( settings.mach_include_subdomain ? '*.' : '' ) + settings.match_domain;
 delete settings.environment_specific;
 
+settings.preferences.forEach(function(preference) {
+    /*
+     * Known-but-unsupported types:
+     * color - not supported by Safari
+     * file - not supported by Safari
+     * directory - not supported by Safari
+     * control - not supported by Safari, not clear what we'd do with it anyway
+     */
+    if ( preference.type.search(/^(bool|boolint|integer|string|menulist|radio)$/) == -1 ) {
+        console.log(
+            'Preference type "' + preference.type + ' is not supported.\n' +
+            'Please specify a valid preference type: bool, boolint, integer, string, menulist, radio\n'
+        );
+        phantom.exit(1);
+    }
+});
+
+
 /*
  * Load settings from lib/local_settings.json
  */
@@ -429,6 +447,38 @@ function build_safari() {
     var xml_txt = '<?xml version="1.0" encoding="UTF-8"?>\n' + new XMLSerializer().serializeToString(document).replace(">",">\n") + "\n";
     fs.write( 'Safari.safariextension/Info.plist', xml_txt );
 
+    if ( settings.preferences )
+        function build_dict( preference, values ) {
+            return '\t<dict>\n\t\t<key>DefaultValue</key>\n\t\t<string>' + preference.value + '</string>\n\t\t<key>Key</key>\n\t\t<string>' + preference.name + '</string>\n\t\t<key>Title</key>\n\t\t<string>' + preference.title + '</string>' +
+                Object.keys(values).map(function(value) {
+                    if      ( typeof(values[value]) == 'string'  ) return '\n\t\t<key>' + value + '</key>\n\t\t<string>' + values[value] + '</string>';
+                    else if ( typeof(values[value]) == 'number'  ) return '\n\t\t<key>' + value + '</key>\n\t\t<real>' + values[value] + '</real>';
+                    else if ( typeof(values[value]) == 'boolean' ) return '\n\t\t<key>' + value + '</key>\n\t\t<' + values[value] + '/>';
+                    else    /* must be an array */                 return '\n\t\t<key>' + value + '</key>\n\t\t<array>' + values[value].map(function(v) { return '\n\t\t\t<string>'+v+'</string>'; }).join('') + '\n\t\t</array>'
+                }).join('') +
+	        '\n\t</dict>\n'
+        }
+        fs.write(
+            'Safari.safariextension/Settings.plist',
+            '<?xml version="1.0" encoding="UTF-8"?>\n' +
+            '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">\n' +
+            '<plist version="1.0">\n' +
+                '<array>\n' +
+            settings.preferences.map(function(preference) {
+                switch ( preference.type ) {
+                case 'bool'    : return build_dict( preference, { Type: 'CheckBox' } );
+                case 'boolint' : return build_dict( preference, { Type: 'CheckBox', FalseValue: 0, TrueValue: 1 } );
+                case 'integer' : return build_dict( preference, { Type: 'Slider'   } );
+                case 'string'  : return build_dict( preference, { Type: 'TextField', Password: false } );
+                case 'menulist': return build_dict( preference, { Type: 'ListBox', Titles: preference.options.map(function(o) { return o.label }), Values: preference.options.map(function(o) { return o.value }),  } );
+                case 'radio'   : return build_dict( preference, { Type: 'RadioButtons', Titles: preference.options.map(function(o) { return o.label }), Values: preference.options.map(function(o) { return o.value }),  } );
+                }
+            }).join('') +
+                '</array>\n' +
+            '</plist>\n',
+            'w'
+        );
+
 }
 
 function build_firefox() {
@@ -459,8 +509,9 @@ function build_firefox() {
         "id": settings.id,
         "name": settings.name
     };
-    if (settings.icons[48]) { pkg.icon    = settings.icons[48]; symbolicLink( '../lib/'+pkg.icon   , 'Firefox/'+pkg.icon    ); }
-    if (settings.icons[64]) { pkg.icon_64 = settings.icons[64]; symbolicLink( '../lib/'+pkg.icon_64, 'Firefox/'+pkg.icon_64 ); }
+    if (settings.icons[48]  ) { pkg.icon        = settings.icons[48]; symbolicLink( '../lib/'+pkg.icon   , 'Firefox/'+pkg.icon    ); }
+    if (settings.icons[64]  ) { pkg.icon_64     = settings.icons[64]; symbolicLink( '../lib/'+pkg.icon_64, 'Firefox/'+pkg.icon_64 ); }
+    if (settings.preferences) { pkg.preferences = settings.preferences; }
     fs.write( 'Firefox/package.json', JSON.stringify(pkg, null, '    ' ) + "\n", 'w' );
 
     // Copy scripts into place:
@@ -544,36 +595,97 @@ function build_chrome() {
         'late'  : 'document_idle'
     };
 
+    var manifest = {
+        "name": settings.title,
+        "author": settings.author,
+        "version": settings.version,
+	"manifest_version": 2,
+        "description": settings.description,
+	"background": {
+	    "scripts": ["background.js"]
+	},
+	"content_scripts": [
+	    {
+		"matches": [ "*://" + settings.pretty_domain + '/*' ],
+		"js": settings.contentScriptFiles,
+		"run_at": when_string[settings.contentScriptWhen]
+	    }
+	],
+	"icons": settings.icons,
+	"permissions": [
+            "*://" + settings.pretty_domain + "/*",
+	    "contextMenus",
+	    "tabs",
+	    "history",
+	    "notifications"
+	]
+    };
+
+    if ( settings.preferences ) {
+        manifest.options_page = "options.html";
+        manifest.permissions.push('storage');
+        manifest.background.scripts.unshift('preferences.js');
+
+        fs.write(
+            'Chrome/' + manifest.background.scripts[0],
+            "var default_preferences = {" +
+            settings.preferences.map(function(preference) {
+                switch ( preference.type ) {
+                case 'bool'   : return "'" + preference.name + "':" + (preference.value?'true':'false');
+                case 'boolint': return "'" + preference.name + "':" + (preference.value?'1'   :'0'    );
+                default       : return "'" + preference.name + "':" +  JSON.stringify(preference.value);
+                }
+            }).join(', ') +
+            "};\n",
+            'w'
+        );
+
+        fs.write(
+            'Chrome/' + manifest.options_page,
+            "<!DOCTYPE html>\n" +
+            "<html>\n" +
+            "<head><title>" + settings.title + " Options</title></head>\n" +
+            '<link rel="stylesheet" type="text/css" href="chrome-bootstrap.css" />\n' +
+            '<body class="chrome-bootstrap">\n' +
+            '<div class="overlay">\n' +
+            '<form class="page">\n' +
+            '<h1>' + settings.title + '</h1>\n' +
+            '<div class="content-area">\n' +
+            settings.preferences.map(function(preference) {
+                switch ( preference.type ) {
+                case 'bool'   : return '<div class="checkbox"><span class="controlled-setting-with-label"><input class="pref" id="' + preference.name + '" ' + (preference.value?' checked':'') + ' type="checkbox"><label for="' + preference.name + '">' + preference.title + '</label></span></div>\n';
+                case 'boolint': return '<div class="checkbox"><span class="controlled-setting-with-label"><input class="pref" id="' + preference.name + '" data-on="1" data-off="0"' + (preference.value?' checked':'') + ' type="checkbox"><label for="' + preference.name + '">' + preference.title + '</label></span></div>\n';
+                case 'integer': return '<label title="' + preference.description + '">' + preference.title + ': <input id="' + preference.name + '" class="pref" type="number" value="' + preference.value + '"></label><br>\n';
+                case 'string': return '<label title="' + preference.description + '">' + preference.title + ': <input id="' + preference.name + '" class="pref" type="text" value="' + preference.value + '"></label><br>\n';
+                case 'menulist':
+                    return '<div class="media-device-control"><span>' + preference.title + ':</span><select id="' + preference.name + '" class="pref weakrtl">' +
+                        preference.options.map(function(option) {
+                            return ' <option value="' + option.value + '"' + ( option.value == preference.value ? ' selected' : '' ) + '>' + option.label + '</option>\n';
+                        }).join('') +
+                        '</select></div>'
+                    ;
+                case 'radio':
+                    return '<section><h3>' + preference.title + '</h3>' +
+                        preference.options.map(function(option,index) {
+                            return '<div class="radio"><span class="controlled-setting-with-label"><input id="' + preference.name + '-' + index + '" class="pref" type="radio" name="' + preference.name + '" value="' + option.value + '"' + ( option.value == preference.value ? ' checked' : '' ) + '><label for="' + preference.name + '-' + index + '">' + option.label + ( option.value == preference.value ? ' (recommended)' : '' ) + '</label></span></div>'
+                        }).join('') + '</section>';
+                }
+            }).join('') +
+
+            '</div>\n' +
+            '<div class="action-area"></div>\n' + // no buttons because we apply changes on click, but the padding makes the page look better
+            '</form>\n' +
+            '</div>\n' +
+            "<script src=\"options.js\"></script>\n" +
+            "</body>\n" +
+            "</html>\n",
+            'w'
+        );
+
+    }
+
     // Create manifest.json:
-    fs.write(
-        'Chrome/manifest.json',
-        JSON.stringify({
-            "name": settings.title,
-            "author": settings.author,
-            "version": settings.version,
-	    "manifest_version": 2,
-            "description": settings.description,
-	    "background": {
-		"scripts": ["background.js"]
-	    },
-	    "content_scripts": [
-		{
-		    "matches": [ "*://" + settings.pretty_domain + '/*' ],
-		    "js": settings.contentScriptFiles,
-		    "run_at": when_string[settings.contentScriptWhen]
-		}
-	    ],
-	    "icons": settings.icons,
-	    "permissions": [
-                "*://" + settings.pretty_domain + "/*",
-		"contextMenus",
-		"tabs",
-		"history",
-		"notifications"
-	    ]
-        }, null, '\t' ) + "\n",
-        'w'
-    );
+    fs.write( 'Chrome/manifest.json', JSON.stringify(manifest, null, '\t' ) + "\n", 'w' );
 
     // Copy scripts and icons into place:
     settings.contentScriptFiles.forEach(function(file) { hardLink( 'lib/'+file               , 'Chrome/' + file                ) });

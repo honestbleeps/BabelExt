@@ -87,3 +87,32 @@ chrome.runtime.onMessage.addListener(
 		}
 	}
 );
+
+// the simple "onMessage" interface only works when the response is sent sychronously.
+// Because preferences need to respond after a delay, we have to use the full interface:
+chrome.runtime.onConnect.addListener(function(port) {
+	console.assert(port.name == "delayedMessage");
+	port.onMessage.addListener(
+		function(request) {
+		    function sendResponse(response) { port.postMessage({ request: request, response: response }) }
+			// all requests expect a JSON object with requestType and then the relevant
+			// companion information...
+			switch(request.requestType) {
+				case 'preferences':
+					switch (request.operation) {
+						case 'getItem':
+							chrome.storage.local.get(request.itemName, function(items) {
+								sendResponse({status: true, key: request.itemName, value: items.hasOwnProperty(request.itemName) ? items[request.itemName] : default_preferences[request.itemName]});
+							});
+							break;
+						case 'setItem':
+							var toSet = {}; toSet[request.itemName] = request.itemValue;
+							chrome.storage.local.set(toSet, function() {
+								sendResponse({status: true, key: request.itemName, value: request.itemValue});
+							});
+							break;
+					}
+			}
+		}
+	);
+});

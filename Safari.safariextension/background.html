@@ -73,6 +73,27 @@
 						break;
 				}
 				break;
+			case 'preferences':
+				switch (request.operation) {
+					case 'getItem':
+						sendResponse({
+							callbackID: request.callbackID,
+							status: true,
+							key: request.itemName,
+							value: safari.extension.settings[request.itemName]
+						}, msgEvent);
+						break;
+					case 'setItem':
+						safari.extension.settings[request.itemName] = request.itemValue;
+						sendResponse({
+							callbackID: request.callbackID,
+							status: true,
+							key: request.itemName,
+							value: request.itemValue
+						}, msgEvent);
+						break;
+				}
+				break;
 			case "contextMenus.create":
 				contextMenuItems[request.obj.onclick] = request.obj;
 				break;

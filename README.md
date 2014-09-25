@@ -34,6 +34,7 @@ has its own function calls and way of working, including, but not limited to:
 - Accessing and controlling tabs (i.e. opening a link in a new one and choosing if it's focused)
 - Cross domain http requests (extensions require)
 - Storing data (using HTML5 localStorage or similar/equivalent engines)
+- Managing add-on preferences (which some browsers call options or settings)
 - Triggering notifications (desktop or browser, depending on the browser's particular level of support)
 - Adding URLs to history (to mark links as visited)
 	- Note: this is a bit of a hack in all non-Chrome browsers...
@@ -48,10 +49,11 @@ websites or functionality on the web.  For this reason, functionality that is no
 by one or more of the 4 BabelExt browsers (Chrome, Firefox, Opera, Safari) may not be added
 to BabelExt.
 
-BabelExt also isn't meant to handle building each browser's native settings consoles/panels, etc.
-They're just too different from each other to try and abstract into a nice little package,
-and with the 4 supported browsers all handling modern HTML/CSS/Javascript so well - it makes
-sense (to me, anyhow) to build settings consoles and the like using those technologies.
+Because each browser implements preferences in a slightly different way, BabelExt only supports
+the baseline functionality that can be supported across all browsers.  That might be enough if
+you only need a few buttons and options, but with the 4 supported browsers all handling modern
+HTML/CSS/Javascript so well - it makes sense (to me, anyhow) to build preference pages into the
+site your extension is for.
 
 That's what I did with Reddit Enhancement Suite, and it has worked rather well. I am considering
 adding the automatic form rendering code from RES into BabelExt, but I will need to devote some
@@ -127,6 +129,17 @@ recognized by Safari. Don't remove that from the name!
 - You're good to go! If you just want to try out the BabelExt kitchen sink demo, navigate to [http://babelext.com/demo/](http://babelext.com/demo/)
 
 - Further Safari development information can be found at [https://developer.apple.com/library/safari/#documentation/Tools/Conceptual/SafariExtensionGuide/Introduction/Introduction.html](https://developer.apple.com/library/safari/#documentation/Tools/Conceptual/SafariExtensionGuide/Introduction/Introduction.html)
+
+## Resetting extension data ##
+
+If your extension uses storage or preferences, you will need to test the extension data with
+different stored values.  Apart from Safari, all the browsers let you creat add multiple
+profiles ("users" in Chrome), so you might want to create throwaway profiles for use during
+testing.
+
+Private browsing isn't much help here, as some private browsing data will be initialised from
+your public data.  If you find profiles too much effort, Chrome/Opera also let you clear
+extension data by deleting all files matching <profile_directory>/Local*/*<extension_ID>*
 
 ## Releasing packages ##
 

@@ -10,6 +10,7 @@ var workers = [];
 var contextMenu = require("sdk/context-menu");
 var priv = require("sdk/private-browsing");
 var windows = require("sdk/windows").browserWindows;
+var prefs = require("sdk/simple-prefs").prefs;
 
 // require chrome allows us to use XPCOM objects...
 const {Cc, Ci, Cu, Cr} = require("chrome");
@@ -136,6 +137,29 @@ pageMod.PageMod({
 						localStorage.setItem(request.itemName, request.itemValue);
 						worker.postMessage({
 							name: 'localStorage',
+							callbackID: request.callbackID,
+							status: true,
+							key: request.itemName,
+							value: request.itemValue
+						});
+						break;
+				}
+				break;
+			case 'preferences':
+				switch (request.operation) {
+					case 'getItem':
+						worker.postMessage({
+							name: 'preferences',
+							callbackID: request.callbackID,
+							status: true,
+							key: request.itemName,
+							value: prefs[request.itemName]
+						});
+						break;
+					case 'setItem':
+						prefs[request.itemName] = request.itemValue;
+						worker.postMessage({
+							name: 'preferences',
 							callbackID: request.callbackID,
 							status: true,
 							key: request.itemName,
