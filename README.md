@@ -69,10 +69,6 @@ In UNIX-based OSes, run `./bin/build.sh build` to build packages, and
 The build system hasn't been tested under Windows yet - your best bet is probably to look at
 the shell script and write a Windows equivalent.  If it's any good, please send in a patch!
 
-**IMPORTANT OPERA NOTE:** Note that the Opera js file has .user.js in it - that's because without this,
-@include and @exclude directives will be ignored and your script will run on every page on
-the internet!
-
 **IMPORTANT SAFARI NOTE:** Safari has a "security feature" that is not documented, gives no user
 feedback at all, and can be a HUGE time sink if you don't know about it!  If you have any
 files in your extension folder that are symlinks, Safari will **silently** ignore them.
