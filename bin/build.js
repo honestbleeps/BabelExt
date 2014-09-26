@@ -1119,6 +1119,18 @@ function release_opera(login_info) {
 
 }
 
+function release_safari() {
+    /*
+     * Safari support is limited at the moment, as it's the least-used browser and the hardest to support.
+     *
+     * To release a Safari extension, start here: https://developer.apple.com/programs/safari/
+     * For instructions on building a Safari extension package on the command line, start here: http://developer.streak.com/2013/01/how-to-build-safari-extension-using.html
+     *
+     * Patches welcome!
+     *
+     */
+}
+
 /*
  * MAIN SECTION
  */
@@ -1151,6 +1163,7 @@ case 'release':
     case 'amo'   : release_amo   (local_settings.   amo_login_info); break;
     case 'chrome': release_chrome(local_settings.chrome_login_info); break;
     case 'opera' : release_opera (local_settings. opera_login_info); break;
+    case 'safari': release_safari(local_settings.safari_login_info); break;
     }
     break;
 
