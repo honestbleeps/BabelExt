@@ -15,7 +15,7 @@
     // set this to release to the Chrome store:
     chrome_login_info: {
 
-        username: 'user@example.org'
+        username: 'user@example.org',
         password: 'password123', // optional - defaults to the environment variable 'CHROME_PASSWORD'
 
         // "ID" string in chrome://extensions/:
@@ -42,7 +42,7 @@
         username: 'user@example.org',
         password: 'password123', // optional - defaults to the environment variable 'OPERA_PASSWORD'
         tested_on: 'Opera 25 Developer Linux' // List of versions you've tested on (see opera://about for your version)
-    }
+    },
 
     // Command to get the changelog for your latest version.
     // At the time of writing, this was required by Opera and hadn't yet been implemented for other browsers:
