@@ -326,7 +326,6 @@ if ( system.env.hasOwnProperty('ENVIRONMENT') ) {
     phantom.exit(1);
 };
 settings.contentScriptFiles.unshift('BabelExt.js');
-settings.pretty_domain = ( settings.mach_include_subdomain ? '*.' : '' ) + settings.match_domain;
 delete settings.environment_specific;
 
 settings.preferences.forEach(function(preference) {
@@ -419,6 +418,17 @@ function build_safari() {
     get_node('Description'               ).textContent = settings.description;
     get_node('Website'                   ).textContent = settings.website;
 
+    var match_domains = get_node('Allowed Domains');
+    while (match_domains.firstChild) match_domains.removeChild(match_domains.firstChild);
+    var domain = document.createElement("string");
+    domain.textContent = settings.match_domain;
+    match_domains.appendChild( document.createTextNode('\n\t\t\t\t') );
+    match_domains.appendChild(domain);
+    match_domains.appendChild( document.createTextNode('\n\t\t\t') );
+
+    var match_secure_domain = get_node('Include Secure Pages');
+    match_secure_domain.parentNode.replaceChild(document.createElement((settings.match_secure_domain||false).toString()),match_secure_domain);
+
     var start_scripts = get_node('Start');
     var   end_scripts = get_node('End');
 
@@ -492,7 +502,10 @@ function build_firefox() {
     // Create settings.js:
     fs.write(
         'Firefox/lib/settings.js',
-        'exports.include = ["http://' + settings.pretty_domain + '/*","https://' + settings.pretty_domain + '/*"];\n' +
+        ( settings.match_secure_domain
+          ? 'exports.include = ["http://' + settings.match_domain + '/*","https://' + settings.match_domain + '/*"];\n'
+          :  'exports.include = ["http://' + settings.match_domain + '/*"];\n'
+        ) +
         'exports.contentScriptWhen = "' + when_string[settings.contentScriptWhen] + '";\n' +
         'exports.contentScriptFile = ' + JSON.stringify(settings.contentScriptFiles) + ";\n"
         ,
@@ -595,6 +608,8 @@ function build_chrome() {
         'late'  : 'document_idle'
     };
 
+    var match_url = ( settings.match_secure_domain ? "*://" : "http://" ) + settings.match_domain + '/*';
+
     var manifest = {
         "name": settings.title,
         "author": settings.author,
@@ -606,14 +621,14 @@ function build_chrome() {
 	},
 	"content_scripts": [
 	    {
-		"matches": [ "*://" + settings.pretty_domain + '/*' ],
+		"matches": [ match_url ],
 		"js": settings.contentScriptFiles,
 		"run_at": when_string[settings.contentScriptWhen]
 	    }
 	],
 	"icons": settings.icons,
 	"permissions": [
-            "*://" + settings.pretty_domain + "/*",
+            match_url,
 	    "contextMenus",
 	    "tabs",
 	    "history",
