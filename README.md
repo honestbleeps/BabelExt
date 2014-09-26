@@ -65,11 +65,11 @@ First, download all of the source from Github and put it together within a folde
 
 Then, download PhantomJS (http://phantomjs.org), which is used to build and deploy extensions.
 
-In UNIX-based OSes, run `./bin/build.sh build` to build packages, and
-`./bin/build.sh release` to release them.
+In UNIX-based OSes, run `./bin/build.sh build` to build packages, and `./bin/build.sh release`
+to release them.
 
 The build system hasn't been tested under Windows yet - your best bet is probably to look at
-the shell script and write a Windows equivalent.  If it's any good, please send in a patch!
+the scripts and write a Windows equivalent.  If it's any good, please send in a patch!
 
 **IMPORTANT SAFARI NOTE:** Safari has a "security feature" that is not documented, gives no user
 feedback at all, and can be a HUGE time sink if you don't know about it!  If you have any
