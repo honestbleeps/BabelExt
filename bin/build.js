@@ -544,10 +544,10 @@ function build_firefox() {
             // do it with `curl` instead:
             console.log( 'Unpacking Firefox Addon SDK...', status );
             childProcess.execFile( 'curl', ['--silent',response.redirectURL,'-o','temporary_file.tar.gz'], null, function(err, stdout, stderr) {
-                if ( stderr != '' ) console.log(stderr.replace(/\n$/,''));
+                if ( stderr != '' ) { console.log(stderr.replace(/\n$/,'')); return program_counter.end(); }
                 fs.makeDirectory('firefox-addon-sdk');
                 childProcess.execFile( 'tar', ["zxf",'temporary_file.tar.gz','-C','firefox-addon-sdk','--strip-components=1'], null, function(err,stdout,stderr) {
-                    if ( stderr != '' ) console.log(stderr.replace(/\n$/,''));
+                    if ( stderr != '' ) { console.log(stderr.replace(/\n$/,'')); return program_counter.end(); }
                     fs.remove('temporary_file.tar.gz');
                     fs.write( 'firefox-addon-sdk-url.txt', response.redirectURL, 'w' );
                     build_xpi();
@@ -571,7 +571,7 @@ function build_firefox() {
 
     // Move the .xpi into place, fix its install.rdf, and update firefox-unpacked:
     function finalise_xpi(err, stdout, stderr) {
-        if ( stderr != '' ) console.log(stderr.replace(/\n$/,''));
+        if ( stderr != '' ) { console.log(stderr.replace(/\n$/,'')); return program_counter.end(); }
         fs.makeDirectory('build');
         var xpi = 'build/' + settings.name + '.xpi';
         if ( fs.exists(xpi) ) fs.remove(xpi);
@@ -579,7 +579,7 @@ function build_firefox() {
         fs.removeTree('firefox-unpacked');
         fs.makeDirectory('firefox-unpacked');
         childProcess.execFile( 'unzip', ['-d','firefox-unpacked',xpi], null, function(err,stdout,stderr) {
-            if ( stderr != '' ) console.log(stderr.replace(/\n$/,''));
+            if ( stderr != '' ) { console.log(stderr.replace(/\n$/,'')); return program_counter.end(); }
             fs.write(
                 'firefox-unpacked/install.rdf',
                 fs.read('firefox-unpacked/install.rdf').replace( /<em:maxVersion>.*<\/em:maxVersion>/, '<em:maxVersion>' + settings.firefox_max_version + '</em:maxVersion>' )
@@ -591,7 +591,7 @@ function build_firefox() {
             fs.changeWorkingDirectory('firefox-unpacked');
             childProcess.execFile( 'zip', ['../'+xpi,'install.rdf'], null, function(err,stdout,stderr) {
                 fs.changeWorkingDirectory('..');
-                if ( stderr != '' ) console.log(stderr.replace(/\n$/,''));
+                if ( stderr != '' ) { console.log(stderr.replace(/\n$/,'')); return program_counter.end(); }
                 console.log('Built ' + xpi + '\n\033[1mRemember to restart Firefox if you added/removed any files!\033[0m');
                 return program_counter.end();
             });
@@ -713,7 +713,7 @@ function build_chrome() {
         build_crx();
     } else {
         childProcess.execFile(chrome_command, ["--pack-extension=Chrome"], null, function (err, stdout, stderr) {
-            if ( stderr != '' ) console.log(stderr.replace(/\n$/,''));
+            if ( stderr != '' ) { console.log(stderr.replace(/\n$/,'')); return program_counter.end(); }
             build_crx();
         });
     };
@@ -721,7 +721,7 @@ function build_chrome() {
     // Build the .crx, move it into place, and build the upload zip file:
     function build_crx() {
         childProcess.execFile(chrome_command, ["--pack-extension=Chrome","--pack-extension-key=Chrome.pem"], null, function (err, stdout, stderr) {
-            if ( stderr != '' ) console.log(stderr.replace(/\n$/,''));
+            if ( stderr != '' ) { console.log(stderr.replace(/\n$/,'')); return program_counter.end(); }
             if ( stdout != 'Created the extension:\n\nChrome.crx\n' ) console.log(stdout.replace(/\n$/,''));
             var crx = 'build/' + settings.name + '.crx';
             if ( fs.exists(crx) ) fs.remove(crx);
@@ -736,7 +736,7 @@ function build_chrome() {
                 ,
                 null,
                 function(err,stdout,stderr) {
-                    if ( stderr != '' ) console.log(stderr.replace(/\n$/,''));
+                    if ( stderr != '' ) { console.log(stderr.replace(/\n$/,'')); return program_counter.end(); }
                     console.log('Built build/chrome-store-upload.zip');
                     return program_counter.end();
                 }
@@ -1009,7 +1009,7 @@ function release_chrome(login_info) {
 
             // PhantomJS refuses to download chunked data, do it with `curl` instead:
             childProcess.execFile( 'curl', ["--silent","https://accounts.google.com/o/oauth2/token",'-d',post_data], null, function(err, json, stderr) {
-                if ( stderr != '' ) console.log(stderr.replace(/\n$/,''));
+                if ( stderr != '' ) { console.log(stderr.replace(/\n$/,'')); return program_counter.end(); }
                 upload_and_publish( JSON.parse(json) );
             });
         }
