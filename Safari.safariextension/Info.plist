@@ -3,13 +3,13 @@
 <plist version="1.0">
 <dict>
 	<key>Author</key>
-	<string>Steve Sobel</string>
+	<string>honestbleeps</string>
 	<key>Builder Version</key>
 	<string>8536.30.1</string>
 	<key>CFBundleDisplayName</key>
-	<string>BabelExt Extension</string>
+	<string>BabelExt</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.honestbleeps.babelext-extension</string>
+	<string>com.honestbleeps.abcdef01-2345-6789-9876-543210fedcba</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleShortVersionString</key>
@@ -35,7 +35,7 @@
 		<array>
 			<dict>
 				<key>Command</key>
-				<string></string>
+				<string/>
 				<key>Identifier</key>
 				<string>notificationButton</string>
 				<key>Image</key>

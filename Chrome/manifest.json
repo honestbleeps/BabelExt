@@ -23,10 +23,11 @@
 	],
 	"icons": {},
 	"permissions": [
-		"*://babelext.com",
+		"*://babelext.com/*",
 		"contextMenus",
 		"tabs",
 		"history",
-		"notifications"
+		"notifications",
+		"storage"
 	]
 }
