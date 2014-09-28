@@ -528,6 +528,8 @@ function build_firefox() {
     fs.write( 'Firefox/package.json', JSON.stringify(pkg, null, '    ' ) + "\n", 'w' );
 
     // Copy scripts into place:
+    fs.removeTree('Firefox/data'); // PhantomJS won't list dangling symlinks, so we have to just delete the directory and recreate it
+    fs.makeDirectory('Firefox/data');
     settings.contentScriptFiles.forEach(function(file) { symbolicLink( '../../lib/'+file, 'Firefox/data/' + file ) });
 
     program_counter.begin();
