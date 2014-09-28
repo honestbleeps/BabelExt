@@ -50,7 +50,7 @@
          * variables from the relevant block will be used:
          */
         "development": {
-            "contentScriptFiles": [ "console.js" ],
+            "contentScriptFiles": [],
         },
 
         "test": {
