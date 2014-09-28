@@ -1,0 +1,28 @@
+{
+  "name": "chrome-bootstrap",
+  "version": "1.4.0",
+  "homepage": "https://github.com/roykolak/chrome-bootstrap",
+  "authors": [
+    "Roy Kolak <roy.kolak@gmail.com>"
+  ],
+  "description": "Reusable Chrome style settings UI",
+  "main": "chrome-bootstrap.css",
+  "keywords": [
+    "css",
+    "bootstrap",
+    "chrome",
+    "extensions",
+    "ui",
+    "interface",
+    "less",
+    "google"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
