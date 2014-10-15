@@ -327,6 +327,17 @@ if ( system.env.hasOwnProperty('ENVIRONMENT') ) {
 settings.contentScriptFiles.unshift('BabelExt.js');
 delete settings.environment_specific;
 
+if (
+    settings.version.search(/^[0-9]+(?:\.[0-9]+){0,3}$/) ||
+    settings.version.split('.').filter(function(number) { return number > 65535 }).length
+) {
+    console.log(
+        'Google Chrome will not accept version number "' + settings.version + '"\n' +
+        'Please specify a version number containing 1-4 dot-separated integers between 0 and 65535'
+    );
+    phantom.exit(1);
+}
+
 settings.preferences.forEach(function(preference) {
     /*
      * Known-but-unsupported types:
