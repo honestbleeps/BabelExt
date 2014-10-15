@@ -59,16 +59,15 @@ function symbolicLink( source, target ) {
  * Create a hard link from source to target
  */
 function hardLink( source, target ) {
-    if ( ! fs.exists(target) ) {
-        if ( system.os.name == 'windows' ) {
-            childProcess.execFile('mklink', ['/H',target,source], function(err, stdout, stderr) {
-                if ( stderr != '' ) console.log(stderr.replace(/\n$/,''));
-            });
-        } else {
-            childProcess.execFile('ln', [source,target], null, function(err, stdout, stderr) {
-                if ( stderr != '' ) console.log(stderr.replace(/\n$/,''));
-            });
-        }
+    if ( fs.exists(target) ) fs.remove(target);
+    if ( system.os.name == 'windows' ) {
+        childProcess.execFile('mklink', ['/H',target,source], function(err, stdout, stderr) {
+            if ( stderr != '' ) console.log(stderr.replace(/\n$/,''));
+        });
+    } else {
+        childProcess.execFile('ln', [source,target], null, function(err, stdout, stderr) {
+            if ( stderr != '' ) console.log(stderr.replace(/\n$/,''));
+        });
     }
 }
 
