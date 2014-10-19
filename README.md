@@ -143,6 +143,8 @@ extension data by deleting all files matching <profile_directory>/Local*/*<exten
 
 ## Releasing packages ##
 
-You need to release the first version of your extension by hand, because each site has slightly different requirements for their extensions.
+You need to release the first version of your extension by hand, because each site has slightly
+different requirements for their extensions.
 
-After the initial release, fill in local_settings.json and run `bin/build.js` with the "release" command to release and update metadata.
+After the initial release, fill in local_settings.json and run `bin/build.js` with the "release"
+command to release and update metadata.
