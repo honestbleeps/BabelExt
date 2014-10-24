@@ -655,10 +655,14 @@ function build_chrome() {
 	]
     };
 
+    var extra_files = [];
+
     if ( settings.preferences ) {
         manifest.options_page = "options.html";
         manifest.permissions.push('storage');
         manifest.background.scripts.unshift('preferences.js');
+        extra_files.push('Chrome/'+manifest.background.scripts[0]);
+        extra_files.push('Chrome/'+manifest.options_page);
 
         fs.write(
             'Chrome/' + manifest.background.scripts[0],
@@ -750,6 +754,7 @@ function build_chrome() {
             childProcess.execFile(
                 'zip',
                 ['build/chrome-store-upload.zip','Chrome/background.js','Chrome/manifest.json']
+                    .concat( extra_files )
                     .concat( settings.contentScriptFiles.map(function(file) { return 'Chrome/'+file }) )
                     .concat( Object.keys(settings.icons).map(function(key ) { return 'Chrome/' + settings.icons[key] }) )
                 ,
