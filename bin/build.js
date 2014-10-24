@@ -1018,7 +1018,6 @@ function release_chrome(login_info) {
         );
 
         function get_auth_key(code) {
-            var page = webPage.create();
             var post_data = "grant_type=authorization_code&redirect_uri=urn:ietf:wg:oauth:2.0:oob&client_id=" + login_info.client_id + "&client_secret=" + login_info.client_secret + "&code=" + code;
 
             // PhantomJS refuses to download chunked data, do it with `curl` instead:
