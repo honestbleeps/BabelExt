@@ -1,4 +1,4 @@
-#!/usr/bin/phantomjs
+#!/usr/bin/phantomjs --ssl-protocol=any
 
 /*
  * Phantom JS build script
