@@ -264,6 +264,8 @@ function page( url, callback ) {
 
     page.showConsoleMessage();
 
+    page.settings.loadImages = false;
+
     return page.open( url, function(status) {
         if (status == 'success') {
             callback(page);
