@@ -548,6 +548,11 @@ function build_firefox() {
 
     // Check whether the Addon SDK is up-to-date:
     var page = webPage.create();
+    page.onResourceError = function(resourceError) {
+        console.log('Unable to load resource (' + resourceError.url + ')');
+        console.log('Error code: ' + resourceError.errorCode + '. Description: ' + resourceError.errorString);
+        return program_counter.end();
+    };
     page.onResourceReceived = function(response) {
         if ( fs.exists('firefox-addon-sdk-url.txt') && fs.read('firefox-addon-sdk-url.txt') == response.redirectURL ) {
             console.log( 'Firefox Addon SDK is up-to-date.' );
