@@ -664,6 +664,12 @@ function build_chrome() {
         extra_files.push('Chrome/'+manifest.background.scripts[0]);
         extra_files.push('Chrome/'+manifest.options_page);
 
+        fs.list('Chrome').forEach(function(file) {
+            if ( file[0] == '.' ) return;
+            if ( file.search( /^(?:background\.js|chrome-bootstrap\.css|options\.js)$/ ) == 0 ) return;
+            fs.remove('Chrome/' + file);
+        });
+
         fs.write(
             'Chrome/' + manifest.background.scripts[0],
             "var default_preferences = {" +
