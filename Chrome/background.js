@@ -102,7 +102,7 @@ chrome.runtime.onConnect.addListener(function(port) {
 					switch (request.operation) {
 						case 'getItem':
 							chrome.storage.local.get(request.itemName, function(items) {
-								sendResponse({status: true, key: request.itemName, value: items.hasOwnProperty(request.itemName) ? items[request.itemName] : default_preferences[request.itemName]});
+								sendResponse({status: true, key: request.itemName, value: (items||{}).hasOwnProperty(request.itemName) ? items[request.itemName] : default_preferences[request.itemName]});
 							});
 							break;
 						case 'setItem':
