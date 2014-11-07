@@ -99,7 +99,7 @@ function _waitForEvent( test, callback ) { // low-level interface - see waitFor*
             console.log('Waited for ' + timeout + 'ms, but ' + failure_reason + ' - see fail.png and fail.html');
             fs.write( 'fail.html', page.content );
             page.render('fail.png');
-            return program_counter.end();
+            return program_counter.end(1);
         }
         return false;
     };
@@ -271,7 +271,7 @@ function page( url, callback ) {
             callback(page);
         } else {
             console.log( "Couln't connect to " + url );
-            return program_counter.end();
+            return program_counter.end(1);
         }
     });
 }
@@ -282,12 +282,13 @@ function page( url, callback ) {
 
 function AsyncCounter(zero_callback) {
     this.count = 0;
+    this.errors = 0;
     this.zero_callback = zero_callback
 }
-AsyncCounter.prototype.begin = function() {       ++this.count };
-AsyncCounter.prototype.end   = function() { if ( !--this.count ) this.zero_callback() };
+AsyncCounter.prototype.begin = function(      ) {                                   ++this.count };
+AsyncCounter.prototype.end   = function(errors) { this.errors += (errors||0); if ( !--this.count ) this.zero_callback(this.errors) };
 
-var program_counter = new AsyncCounter(function() { phantom.exit(0) });
+var program_counter = new AsyncCounter(function(errors) { phantom.exit(errors||0) });
 
 /*
  * Load settings from lib/settings.json
@@ -388,7 +389,7 @@ function get_changelog(callback) { // call the callback with the changelog text 
             if (err) throw err;
             if ( changelog == '' ) {
                 console.log( "Error: empty changelog" );
-                return program_counter.end();
+                return program_counter.end(1);
             } else {
                 callback( local_settings.changelog = changelog );
             }
@@ -551,7 +552,7 @@ function build_firefox() {
     page.onResourceError = function(resourceError) {
         console.log('Unable to load resource (' + resourceError.url + ')');
         console.log('Error code: ' + resourceError.errorCode + '. Description: ' + resourceError.errorString);
-        return program_counter.end();
+        return program_counter.end(1);
     };
     page.onResourceReceived = function(response) {
         if ( fs.exists('firefox-addon-sdk-url.txt') && fs.read('firefox-addon-sdk-url.txt') == response.redirectURL ) {
@@ -563,10 +564,10 @@ function build_firefox() {
             // do it with `curl` instead:
             console.log( 'Unpacking Firefox Addon SDK...', status );
             childProcess.execFile( 'curl', ['--silent',response.redirectURL,'-o','temporary_file.tar.gz'], null, function(err, stdout, stderr) {
-                if ( stderr != '' ) { console.log(stderr.replace(/\n$/,'')); return program_counter.end(); }
+                if ( stderr != '' ) { console.log(stderr.replace(/\n$/,'')); return program_counter.end(1); }
                 fs.makeDirectory('firefox-addon-sdk');
                 childProcess.execFile( 'tar', ["zxf",'temporary_file.tar.gz','-C','firefox-addon-sdk','--strip-components=1'], null, function(err,stdout,stderr) {
-                    if ( stderr != '' ) { console.log(stderr.replace(/\n$/,'')); return program_counter.end(); }
+                    if ( stderr != '' ) { console.log(stderr.replace(/\n$/,'')); return program_counter.end(1); }
                     fs.remove('temporary_file.tar.gz');
                     fs.write( 'firefox-addon-sdk-url.txt', response.redirectURL, 'w' );
                     build_xpi();
@@ -590,7 +591,7 @@ function build_firefox() {
 
     // Move the .xpi into place, fix its install.rdf, and update firefox-unpacked:
     function finalise_xpi(err, stdout, stderr) {
-        if ( stderr != '' ) { console.log(stderr.replace(/\n$/,'')); return program_counter.end(); }
+        if ( stderr != '' ) { console.log(stderr.replace(/\n$/,'')); return program_counter.end(1); }
         fs.makeDirectory('build');
         var xpi = 'build/' + settings.name + '.xpi';
         if ( fs.exists(xpi) ) fs.remove(xpi);
@@ -598,7 +599,7 @@ function build_firefox() {
         fs.removeTree('firefox-unpacked');
         fs.makeDirectory('firefox-unpacked');
         childProcess.execFile( 'unzip', ['-d','firefox-unpacked',xpi], null, function(err,stdout,stderr) {
-            if ( stderr != '' ) { console.log(stderr.replace(/\n$/,'')); return program_counter.end(); }
+            if ( stderr != '' ) { console.log(stderr.replace(/\n$/,'')); return program_counter.end(1); }
             fs.write(
                 'firefox-unpacked/install.rdf',
                 fs.read('firefox-unpacked/install.rdf').replace( /<em:maxVersion>.*<\/em:maxVersion>/, '<em:maxVersion>' + settings.firefox_max_version + '</em:maxVersion>' )
@@ -610,9 +611,9 @@ function build_firefox() {
             fs.changeWorkingDirectory('firefox-unpacked');
             childProcess.execFile( 'zip', ['../'+xpi,'install.rdf'], null, function(err,stdout,stderr) {
                 fs.changeWorkingDirectory('..');
-                if ( stderr != '' ) { console.log(stderr.replace(/\n$/,'')); return program_counter.end(); }
+                if ( stderr != '' ) { console.log(stderr.replace(/\n$/,'')); return program_counter.end(1); }
                 console.log('Built ' + xpi + '\n\033[1mRemember to restart Firefox if you added/removed any files!\033[0m');
-                return program_counter.end();
+                return program_counter.end(0);
             });
         });
     }
@@ -742,7 +743,7 @@ function build_chrome() {
         build_crx();
     } else {
         childProcess.execFile(chrome_command, ["--pack-extension=Chrome"], null, function (err, stdout, stderr) {
-            if ( stderr != '' ) { console.log(stderr.replace(/\n$/,'')); return program_counter.end(); }
+            if ( stderr != '' ) { console.log(stderr.replace(/\n$/,'')); return program_counter.end(1); }
             build_crx();
         });
     };
@@ -750,7 +751,7 @@ function build_chrome() {
     // Build the .crx, move it into place, and build the upload zip file:
     function build_crx() {
         childProcess.execFile(chrome_command, ["--pack-extension=Chrome","--pack-extension-key=Chrome.pem"], null, function (err, stdout, stderr) {
-            if ( stderr != '' ) { console.log(stderr.replace(/\n$/,'')); return program_counter.end(); }
+            if ( stderr != '' ) { console.log(stderr.replace(/\n$/,'')); return program_counter.end(1); }
             if ( stdout != 'Created the extension:\n\nChrome.crx\n' ) console.log(stdout.replace(/\n$/,''));
             var crx = 'build/' + settings.name + '.crx';
             if ( fs.exists(crx) ) fs.remove(crx);
@@ -766,9 +767,9 @@ function build_chrome() {
                 ,
                 null,
                 function(err,stdout,stderr) {
-                    if ( stderr != '' ) { console.log(stderr.replace(/\n$/,'')); return program_counter.end(); }
+                    if ( stderr != '' ) { console.log(stderr.replace(/\n$/,'')); return program_counter.end(1); }
                     console.log('Built build/chrome-store-upload.zip');
-                    return program_counter.end();
+                    return program_counter.end(0);
                 }
             );
         });
@@ -789,7 +790,7 @@ function release_amo(login_info) {
             login_info.password = system.env.AMO_PASSWORD;
         } else {
             console.log("Please specify a password for addons.mozilla.org");
-            return program_counter.end();
+            return program_counter.end(1);
         }
     }
 
@@ -919,7 +920,7 @@ function release_amo(login_info) {
                                             '.notification-box.success',
                                             function() {
                                                 console.log('Released to https://addons.mozilla.org/en-US/firefox/addon/' + name);
-                                                return program_counter.end();
+                                                return program_counter.end(0);
                                                 }
                                         );
                                     }
@@ -942,7 +943,7 @@ function release_chrome(login_info) {
             login_info.password = system.env.CHROME_PASSWORD;
         } else {
             console.log("Please specify a password for the Chrome store");
-            return program_counter.end();
+            return program_counter.end(1);
         }
     }
 
@@ -1038,7 +1039,7 @@ function release_chrome(login_info) {
 
             // PhantomJS refuses to download chunked data, do it with `curl` instead:
             childProcess.execFile( 'curl', ["--silent","https://accounts.google.com/o/oauth2/token",'-d',post_data], null, function(err, json, stderr) {
-                if ( stderr != '' ) { console.log(stderr.replace(/\n$/,'')); return program_counter.end(); }
+                if ( stderr != '' ) { console.log(stderr.replace(/\n$/,'')); return program_counter.end(1); }
                 upload_and_publish( JSON.parse(json) );
             });
         }
@@ -1060,7 +1061,7 @@ function release_chrome(login_info) {
                         var result = JSON.parse(page.plainText);
                         if ( result.error ) {
                             console.log( page.plainText );
-                            return program_counter.end();
+                            return program_counter.end(1);
                         }
                         page.open(
                             "https://www.googleapis.com/chromewebstore/v1.1/items/" + login_info.id + "/publish",
@@ -1069,14 +1070,14 @@ function release_chrome(login_info) {
                             function (status) {
                                 if ( result.error ) {
                                     console.log( page.plainText );
-                                    return program_counter.end();
+                                    return program_counter.end(1);
                                 }
                                 if ( status == "success" ) {
                                     console.log('Released to https://chrome.google.com/webstore/detail/' + login_info.id);
-                                    return program_counter.end();
+                                    return program_counter.end(0);
                                 } else {
                                     console.log( "Couln't upload new version" );
-                                    return program_counter.end();
+                                    return program_counter.end(1);
                                 }
                             }
                         );
@@ -1098,7 +1099,7 @@ function release_opera(login_info) {
             login_info.password = system.env.OPERA_PASSWORD;
         } else {
             console.log("Please specify a password for the Opera Developer site");
-            return program_counter.end();
+            return program_counter.end(1);
         }
     }
 
@@ -1135,7 +1136,7 @@ function release_opera(login_info) {
                                 [ '#dev-sel-container' ],
                                 function() {
                                     console.log('Released to https://addons.opera.com/en-gb/extensions/details/' + settings.name);
-                                    return program_counter.end();
+                                    return program_counter.end(0);
                                 }
                             );
                         }
@@ -1200,4 +1201,4 @@ default:
     usage();
 
 }
-program_counter.end();
+program_counter.end(0);
