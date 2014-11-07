@@ -88,13 +88,22 @@ chrome.runtime.onMessage.addListener(
 	}
 );
 
+var storage_local_works = false;
+try {
+	chrome.storage.local.get('', function() {});
+	storage_local_works = true;
+} catch (e) {
+	console.log( 'chrome.storage.local disabled: ', e );
+	console.log( 'This extension will still work, but will act as if all options have the default value.' );
+}
+
 // the simple "onMessage" interface only works when the response is sent sychronously.
 // Because preferences need to respond after a delay, we have to use the full interface:
 chrome.runtime.onConnect.addListener(function(port) {
 	console.assert(port.name == "delayedMessage");
-	port.onMessage.addListener(
-		function(request) {
-		    function sendResponse(response) { port.postMessage({ request: request, response: response }) }
+	if ( storage_local_works  ) {
+		port.onMessage.addListener(function(request) {
+			function sendResponse(response) { port.postMessage({ request: request, response: response }) }
 			// all requests expect a JSON object with requestType and then the relevant
 			// companion information...
 			switch(request.requestType) {
@@ -113,6 +122,23 @@ chrome.runtime.onConnect.addListener(function(port) {
 							break;
 					}
 			}
-		}
-	);
+		});
+	} else {
+		port.onMessage.addListener(function(request) {
+			function sendResponse(response) { port.postMessage({ request: request, response: response }) }
+			// all requests expect a JSON object with requestType and then the relevant
+			// companion information...
+			switch(request.requestType) {
+				case 'preferences':
+					switch (request.operation) {
+						case 'getItem':
+							sendResponse({status: true, key: request.itemName, value: default_preferences[request.itemName]});
+							break;
+						case 'setItem':
+							sendResponse({status: false, key: request.itemName, value: request.itemValue});
+							break;
+					}
+			}
+		});
+	}
 });
