@@ -88,20 +88,28 @@ chrome.runtime.onMessage.addListener(
 	}
 );
 
-var storage_local_works = false;
+// chrome.storage.local should return almost instantly, but has been seen in the wild timing out.
+// We do a test request first, and use a fallback implementation if that takes too long.
+// The fallback implementation always returns default values.
+var storage_local_works = true, storage_start_time = new Date().getTime();
 try {
-	chrome.storage.local.get('', function() {});
-	storage_local_works = true;
+	chrome.storage.local.get('', function() {
+		storage_local_works = new Date().getTime() - storage_start_time < 1000;
+		if (!storage_local_works) {
+			console.log( 'chrome.storage.local took too long to respond - disabing.', chrome.runtime.lastError );
+		}
+	});
 } catch (e) {
-	console.log( 'chrome.storage.local disabled: ', e );
-	console.log( 'This extension will still work, but will act as if all options have the default value.' );
+	storage_local_works = false;
+	console.log('chrome.storage.local disabled: ', e);
+	console.log('This extension will still work, but will act as if all options have the default value.');
 }
 
 // the simple "onMessage" interface only works when the response is sent sychronously.
 // Because preferences need to respond after a delay, we have to use the full interface:
 chrome.runtime.onConnect.addListener(function(port) {
 	console.assert(port.name == "delayedMessage");
-	if ( storage_local_works  ) {
+	if (storage_local_works) { // default behaviour
 		port.onMessage.addListener(function(request) {
 			function sendResponse(response) { port.postMessage({ request: request, response: response }) }
 			// all requests expect a JSON object with requestType and then the relevant
@@ -123,11 +131,9 @@ chrome.runtime.onConnect.addListener(function(port) {
 					}
 			}
 		});
-	} else {
+	} else { // fallback behaviour - return default values without waiting for the storage system
 		port.onMessage.addListener(function(request) {
 			function sendResponse(response) { port.postMessage({ request: request, response: response }) }
-			// all requests expect a JSON object with requestType and then the relevant
-			// companion information...
 			switch(request.requestType) {
 				case 'preferences':
 					switch (request.operation) {
