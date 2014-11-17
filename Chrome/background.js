@@ -81,6 +81,9 @@ chrome.runtime.onMessage.addListener(
 				}
 				chrome.contextMenus.create(request.obj);
 				break;
+			case 'contextMenus.remove':
+				chrome.contextMenus.remove(request.obj.id);
+				break;
 			default:
 				sendResponse({status: "unrecognized request type"});
 				break;
