@@ -1,14 +1,14 @@
 // Import the APIs we need.
 
-var pageMod = require("page-mod");
-var Request = require("request").Request;
-var notifications = require("notifications");
-var self = require("self");
-var tabs = require("tabs");
-var ss = require("simple-storage");
+var pageMod = require("sdk/page-mod");
+var Request = require("sdk/request").Request;
+var notifications = require("sdk/notifications");
+var self = require("sdk/self");
+var tabs = require("sdk/tabs");
+var ss = require("sdk/simple-storage");
 var workers = [];
-var contextMenu = require("context-menu");
-var priv = require("private-browsing");
+var contextMenu = require("sdk/context-menu");
+var priv = require("sdk/private-browsing");
 var windows = require("sdk/windows").browserWindows;
 
 // require chrome allows us to use XPCOM objects...
@@ -173,6 +173,18 @@ pageMod.PageMod({
 					}
 
 				});
+				break;
+			case 'contextMenus.remove':
+				// Run through the current context items and destroy the one with a matching name
+				contextItems = contextMenu.contentContextMenu.items;
+				var len = contextItems.length;
+				for(var i =0; i < len; ++i){
+					if(request.obj.title == contextItems[i].label){
+						contextMenu.contentContextMenu.destroy(contextItems[i]);
+						break;
+					}
+				}
+
 				break;
 			default:
 				worker.postMessage({status: "unrecognized request type"});
