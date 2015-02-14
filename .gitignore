@@ -1,7 +1,7 @@
 /build/firefox-unpacked
 /build/firefox-addon-sdk-url.txt
 /build/firefox-addon-sdk
-/lib/local_settings.json
+/conf/local_settings.json
 /build/Chrome.pem
 /out
 *~
