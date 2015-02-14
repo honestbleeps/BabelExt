@@ -92,7 +92,7 @@ recognized by Safari. Don't remove that from the name!
 
 - Check "Developer Mode"
 
-- Click "load unpacked extension" and choose the Chrome directory
+- Click "load unpacked extension" and choose the build/Chrome directory
 
 - You're good to go! If you just want to try out the BabelExt kitchen sink demo, navigate to [http://babelext.com/demo/](http://babelext.com/demo/)
 
@@ -106,7 +106,7 @@ recognized by Safari. Don't remove that from the name!
 
 - Open the "extensions" subdirectory and look for a subdirectory matching the "id" in your settings.json file
 
-- Delete the file and replace it with a link to your extension's "firefox-unpacked" directory
+- Delete the file and replace it with a link to your extension's "build/firefox-unpacked" directory
 
 - Restart Firefox
 
@@ -124,7 +124,7 @@ recognized by Safari. Don't remove that from the name!
 
 - Click the + button at the bottom left, and choose "Add Extension"
 
-- Choose the Safari.safariextension folder from BabelExt
+- Choose the build/Safari.safariextension folder from BabelExt
 
 - You're good to go! If you just want to try out the BabelExt kitchen sink demo, navigate to [http://babelext.com/demo/](http://babelext.com/demo/)
 
