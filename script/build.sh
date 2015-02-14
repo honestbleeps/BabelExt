@@ -24,4 +24,4 @@ then
     export OPERA_PASSWORD
 fi
 
-exec ./bin/build.js "$@"
+exec ./script/build.js "$@"

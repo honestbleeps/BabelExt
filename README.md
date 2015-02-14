@@ -65,7 +65,7 @@ First, download all of the source from Github and put it together within a folde
 
 Then, download PhantomJS (http://phantomjs.org), which is used to build and deploy extensions.
 
-In UNIX-based OSes, run `./bin/build.sh build` to build packages, and `./bin/build.sh release`
+In UNIX-based OSes, run `./script/build.sh build` to build packages, and `./script/build.sh release`
 to release them.
 
 The build system hasn't been tested under Windows yet - your best bet is probably to look at
@@ -146,5 +146,5 @@ extension data by deleting all files matching <profile_directory>/Local*/*<exten
 You need to release the first version of your extension by hand, because each site has slightly
 different requirements for their extensions.
 
-After the initial release, fill in local_settings.json and run `bin/build.js` with the "release"
+After the initial release, fill in local_settings.json and run `script/build.js` with the "release"
 command to release and update metadata.
