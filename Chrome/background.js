@@ -79,7 +79,12 @@ chrome.runtime.onMessage.addListener(
 						contextMenuClick(info, tab, callbackID);
 					};
 				}
+				// id not available on firefox but title is, use it as common id
+				request.obj.id = request.obj.title;
 				chrome.contextMenus.create(request.obj);
+				break;
+			case 'contextMenus.remove':
+				chrome.contextMenus.remove(request.obj.title);
 				break;
 			default:
 				sendResponse({status: "unrecognized request type"});
