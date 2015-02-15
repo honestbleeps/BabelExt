@@ -5,5 +5,77 @@
     "version": "0.95",
     "title": "BabelExt",
     "id": "abcdef01-2345-6789-9876-543210fedcba",
-    "name": "babelext_your_name_here"
+    "name": "babelext_your_name_here",
+    "preferences": [
+        {
+            "name": "myBool",
+            "type": "bool",
+            "title": "myBool preference title",
+            "description": "myBool short description for the preference",
+            "value": false
+        },
+        {
+            "name": "myBoolint",
+            "type": "boolint",
+            "title": "myBoolint preference title",
+            "description": "myBoolint short description for the preference",
+            "off": "1",
+            "on": "2",
+            "value": 1
+        },
+        {
+            "name": "myInteger",
+            "type": "integer",
+            "title": "myInteger preference title",
+            "description": "myInteger short description for the preference",
+            "value": 2
+        },
+        {
+            "name": "myString",
+            "type": "string",
+            "title": "myString preference title",
+            "description": "myString short description for the preference",
+            "value": "this is the default string value"
+        },
+        {
+            "name": "myMenulist",
+            "type": "menulist",
+            "title": "myMenulist preference title",
+            "value": 0,
+            "options": [
+                {
+                    "value": "0",
+                    "label": "first label"
+                },
+                {
+                    "value": "1",
+                    "label": "second label"
+                },
+                {
+                    "value": "2",
+                    "label": "third label"
+                }
+            ]
+        },
+        {
+            "name": "myRadio",
+            "type": "radio",
+            "title": "myRadioTitle",
+            "value": "a",
+            "options": [
+                {
+                    "value": "a",
+                    "label": "first label"
+                },
+                {
+                    "value": "b",
+                    "label": "second label"
+                },
+                {
+                    "value": "c",
+                    "label": "third label"
+                }
+            ]
+        }
+    ]
 }

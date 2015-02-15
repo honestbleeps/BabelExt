@@ -16,7 +16,7 @@ chrome.runtime.onMessage.addListener(
 				if (request.method === "POST") {
 					xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 					// xhr.setRequestHeader("Content-length", request.data.length);
-					// xhr.setRequestHeader("Connection", "close");					
+					// xhr.setRequestHeader("Connection", "close");
 				}
 				xhr.onreadystatechange = function() {
 					if (xhr.readyState === 4) {
@@ -31,7 +31,7 @@ chrome.runtime.onMessage.addListener(
 			case 'createTab':
 				var newIndex,
 					focus = (request.background !== true);
-				
+
 				if (typeof(request.index) !== 'undefined') {
 					newIndex = request.index;
 				} else {

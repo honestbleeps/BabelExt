@@ -57,11 +57,11 @@
 		<dict>
 			<key>End</key>
 			<array>
-				<string>extension.js</string>
+				<string>src/extension.js</string>
 			</array>
 			<key>Start</key>
 			<array>
-				<string>BabelExt.js</string>
+				<string>lib/BabelExt.js</string>
 			</array>
 		</dict>
 		<key>Stylesheets</key>

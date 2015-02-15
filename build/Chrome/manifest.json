@@ -6,6 +6,7 @@
 	"description": "An extension created with BabelExt - www.babelext.com",
 	"background": {
 		"scripts": [
+			"preferences.js",
 			"background.js"
 		]
 	},
@@ -15,10 +16,13 @@
 				"*://babelext.com/*"
 			],
 			"js": [
-				"BabelExt.js",
-				"extension.js"
+				"lib/BabelExt.js",
+				"src/extension.js"
 			],
-			"run_at": "document_end"
+			"run_at": "document_end",
+			"css": [
+				"src/extension.css"
+			]
 		}
 	],
 	"icons": {},
@@ -29,5 +33,6 @@
 		"history",
 		"notifications",
 		"storage"
-	]
+	],
+	"options_page": "options.html"
 }
