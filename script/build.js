@@ -42,6 +42,7 @@ phantom.onError = function(msg, trace) {
  * Create a symbolic link from source to target
  */
 function symbolicLink( source, target ) {
+    target.replace(/\//g, function() { source = '../' + source });
     if ( ! fs.isLink(target) ) {
         if ( system.os.name == 'windows' ) {
             childProcess.execFile('mklink', [target,source], function(err, stdout, stderr) {
@@ -291,14 +292,14 @@ AsyncCounter.prototype.end   = function(errors) { this.errors += (errors||0); if
 var program_counter = new AsyncCounter(function(errors) { phantom.exit(errors||0) });
 
 /*
- * Load settings from lib/settings.json
+ * Load settings from conf/settings.json
  */
 var settings;
 try {
-    settings = eval('('+fs.read('lib/settings.json')+')');
+    settings = eval('('+fs.read('conf/settings.json')+')');
 } catch (e) {
     console.error(
-        "Error in lib/settings.json: " + e + "\n" +
+        "Error in conf/settings.json: " + e + "\n" +
         "Please make sure the file is formatted correctly and try again."
     );
     phantom.exit(1);
@@ -327,7 +328,7 @@ if ( system.env.hasOwnProperty('ENVIRONMENT') ) {
     );
     phantom.exit(1);
 };
-settings.contentScriptFiles.unshift('BabelExt.js');
+settings.contentScriptFiles.unshift('lib/BabelExt.js');
 delete settings.environment_specific;
 
 if (
@@ -360,14 +361,14 @@ settings.preferences.forEach(function(preference) {
 
 
 /*
- * Load settings from lib/local_settings.json
+ * Load settings from conf/local_settings.json
  */
 var local_settings;
 try {
-    local_settings = eval('('+fs.read('lib/local_settings.json')+')');
+    local_settings = eval('('+fs.read('conf/local_settings.json')+')');
 } catch (e) {
     console.error(
-        "Error in lib/local_settings.json: " + e + "\n" +
+        "Error in conf/local_settings.json: " + e + "\n" +
         "Please make sure the file is formatted correctly and try again."
     );
     phantom.exit(1);
@@ -448,14 +449,18 @@ function build_safari() {
     while (start_scripts.firstChild) start_scripts.removeChild(start_scripts.firstChild);
     while (  end_scripts.firstChild)   end_scripts.removeChild(  end_scripts.firstChild);
 
+    fs.makeDirectory('build/Safari.safariextension/icons');
+    fs.makeDirectory('build/Safari.safariextension/src');
+    fs.makeDirectory('build/Safari.safariextension/lib');
+
     settings.contentScriptFiles.forEach(function(file) {
-        hardLink( 'lib/'+file, 'build/Safari.safariextension/' + file )
+        hardLink( file, 'build/Safari.safariextension/' + file )
 
         var script = document.createElement("string");
         script.textContent = file;
 
 
-        if ( file == 'BabelExt.js' || when_string[ settings.contentScriptWhen ] == 'Start' ) {
+        if ( file == 'lib/BabelExt.js' || when_string[ settings.contentScriptWhen ] == 'Start' ) {
             start_scripts.appendChild( document.createTextNode('\n\t\t\t\t') );
             start_scripts.appendChild(script);
         } else {
@@ -512,6 +517,15 @@ function build_firefox() {
         'late'  : 'end'
     };
 
+    // Copy scripts into place:
+    fs.removeTree('build/Firefox/data'); // PhantomJS won't list dangling symlinks, so we have to just delete the directory and recreate it
+    fs.makeDirectory('build/Firefox/data');
+    fs.makeDirectory('build/Firefox/data/src');
+    fs.makeDirectory('build/Firefox/data/lib');
+    fs.makeDirectory('build/Firefox/icons');
+
+    settings.contentScriptFiles.forEach(function(file) { symbolicLink( file, 'build/Firefox/data/' + file ) });
+
     // Create settings.js:
     fs.write(
         'build/Firefox/lib/settings.js',
@@ -535,15 +549,10 @@ function build_firefox() {
         "id": settings.id,
         "name": settings.name
     };
-    if (settings.icons[48]  ) { pkg.icon        = settings.icons[48]; symbolicLink( '../lib/'+pkg.icon   , 'build/Firefox/'+pkg.icon    ); }
-    if (settings.icons[64]  ) { pkg.icon_64     = settings.icons[64]; symbolicLink( '../lib/'+pkg.icon_64, 'build/Firefox/'+pkg.icon_64 ); }
+    if (settings.icons[48]  ) { pkg.icon        = settings.icons[48]; symbolicLink( pkg.icon   , 'build/Firefox/'+pkg.icon    ); }
+    if (settings.icons[64]  ) { pkg.icon_64     = settings.icons[64]; symbolicLink( pkg.icon_64, 'build/Firefox/'+pkg.icon_64 ); }
     if (settings.preferences) { pkg.preferences = settings.preferences; }
     fs.write( 'build/Firefox/package.json', JSON.stringify(pkg, null, '    ' ) + "\n", 'w' );
-
-    // Copy scripts into place:
-    fs.removeTree('build/Firefox/data'); // PhantomJS won't list dangling symlinks, so we have to just delete the directory and recreate it
-    fs.makeDirectory('build/Firefox/data');
-    settings.contentScriptFiles.forEach(function(file) { symbolicLink( '../../lib/'+file, 'build/Firefox/data/' + file ) });
 
     program_counter.begin();
 
@@ -555,7 +564,7 @@ function build_firefox() {
         return program_counter.end(1);
     };
     page.onResourceReceived = function(response) {
-        if ( fs.exists('firefox-addon-sdk-url.txt') && fs.read('firefox-addon-sdk-url.txt') == response.redirectURL ) {
+        if ( fs.exists('build/firefox-addon-sdk-url.txt') && fs.read('build/firefox-addon-sdk-url.txt') == response.redirectURL ) {
             console.log( 'Firefox Addon SDK is up-to-date.' );
             build_xpi();
         } else {
@@ -596,19 +605,19 @@ function build_firefox() {
         var xpi = 'out/' + settings.name + '.xpi';
         if ( fs.exists(xpi) ) fs.remove(xpi);
         fs.list('build/Firefox').forEach(function(file) { if ( file.search(/\.xpi$/) != -1 ) fs.move( 'build/Firefox/' + file, xpi ); });
-        fs.removeTree('firefox-unpacked');
-        fs.makeDirectory('firefox-unpacked');
-        childProcess.execFile( 'unzip', ['-d','firefox-unpacked',xpi], null, function(err,stdout,stderr) {
+        fs.removeTree('build/firefox-unpacked');
+        fs.makeDirectory('build/firefox-unpacked');
+        childProcess.execFile( 'unzip', ['-d','build/firefox-unpacked',xpi], null, function(err,stdout,stderr) {
             if ( stderr != '' ) { console.log(stderr.replace(/\n$/,'')); return program_counter.end(1); }
             fs.write(
-                'firefox-unpacked/install.rdf',
-                fs.read('firefox-unpacked/install.rdf').replace( /<em:maxVersion>.*<\/em:maxVersion>/, '<em:maxVersion>' + settings.firefox_max_version + '</em:maxVersion>' )
+                'build/firefox-unpacked/install.rdf',
+                fs.read('build/firefox-unpacked/install.rdf').replace( /<em:maxVersion>.*<\/em:maxVersion>/, '<em:maxVersion>' + settings.firefox_max_version + '</em:maxVersion>' )
             );
             settings.contentScriptFiles.forEach(function(file) {
-                fs.remove('firefox-unpacked/resources/'+settings.name+'/data/'+file);
-                symbolicLink( '../../../../lib/'+file, 'firefox-unpacked/resources/'+settings.name+'/data/'+file )
+                fs.remove('build/firefox-unpacked/resources/'+settings.name+'/data/'+file);
+                symbolicLink( file, 'build/firefox-unpacked/resources/'+settings.name+'/data/'+file )
             });
-            fs.changeWorkingDirectory('firefox-unpacked');
+            fs.changeWorkingDirectory('build/firefox-unpacked');
             childProcess.execFile( 'zip', ['../'+xpi,'install.rdf'], null, function(err,stdout,stderr) {
                 fs.changeWorkingDirectory('..');
                 if ( stderr != '' ) { console.log(stderr.replace(/\n$/,'')); return program_counter.end(1); }
@@ -668,7 +677,10 @@ function build_chrome() {
         fs.list('build/Chrome').forEach(function(file) {
             if ( file[0] == '.' ) return;
             if ( file.search( /^(?:background\.js|chrome-bootstrap\.css|options\.js)$/ ) == 0 ) return;
-            fs.remove('build/Chrome/' + file);
+            if ( fs.isDirectory(file) )
+                fs.removeTree('build/Chrome/' + file);
+            else
+                fs.remove    ('build/Chrome/' + file);
         });
 
         fs.write(
@@ -732,9 +744,13 @@ function build_chrome() {
     // Create manifest.json:
     fs.write( 'build/Chrome/manifest.json', JSON.stringify(manifest, null, '\t' ) + "\n", 'w' );
 
+    fs.makeDirectory('build/Chrome/icons');
+    fs.makeDirectory('build/Chrome/src');
+    fs.makeDirectory('build/Chrome/lib');
+
     // Copy scripts and icons into place:
-    settings.contentScriptFiles.forEach(function(file) { hardLink( 'lib/'+file               , 'build/Chrome/' + file                ) });
-    Object.keys(settings.icons).forEach(function(key ) { hardLink( 'lib/'+settings.icons[key], 'build/Chrome/' + settings.icons[key] ) });
+    settings.contentScriptFiles.forEach(function(file) { hardLink( file               , 'build/Chrome/' + file                ) });
+    Object.keys(settings.icons).forEach(function(key ) { hardLink( settings.icons[key], 'build/Chrome/' + settings.icons[key] ) });
 
     program_counter.begin();
 
@@ -875,7 +891,7 @@ function release_amo(login_info) {
                                     page.submit_form(
                                         '#id_icon_upload',
                                         {
-                                            '#id_icon_upload': 'lib/'+best_icon
+                                            '#id_icon_upload': best_icon
                                         },
                                         function() {
                                             setTimeout(function() {
@@ -970,7 +986,7 @@ function release_chrome(login_info) {
                 page.submit_form(
                     '.id-upload-image.cx-bold',
                     {
-                        '#cx-img-uploader-input': 'lib/' + settings.icons[128]
+                        '#cx-img-uploader-input': settings.icons[128]
                     },
                     function() {
                         page.waitForElementsPresent(
@@ -1128,7 +1144,7 @@ function release_opera(login_info) {
                             '#id_translations-0-long_description' : settings.long_description,
                             '#id_translations-0-changelog'        : changelog,
                             '#id_target_platform-comment'         : login_info.tested_on,
-                            '#id_icons-0-icon'                    : settings.icons[64] ? 'lib/' + settings.icons[64] : undefined,
+                            '#id_icons-0-icon'                    : settings.icons[64] ? settings.icons[64] : undefined,
                         },
                         function() {
                             page.click('input.submit-button[type="submit"][name="approve_widget"]');

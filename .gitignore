@@ -5,8 +5,7 @@
 /build/Chrome.pem
 /out
 *~
-/build/Chrome/*.png
-/build/Chrome/options.html
+/build/Chrome
 /build/Firefox/*.png
-/build/Firefox/data/*.js
-/build/Safari.safariextension/Settings.plist
+/build/Firefox/data
+/build/Safari.safariextension

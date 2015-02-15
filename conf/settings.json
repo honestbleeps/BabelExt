@@ -16,11 +16,11 @@
     "website":     "http://babelext.com",
     "icons": {
         /*
-        16:     "icon-16.png",
-        32:     "icon-32.png",
-        48:     "icon-48.png",
-        64:     "icon-64.png",
-        128:    "icon-128.png"
+        16:     "icons/icon-16.png",
+        32:     "icons/icon-32.png",
+        48:     "icons/icon-48.png",
+        64:     "icons/icon-64.png",
+        128:    "icons/icon-128.png"
     */
     },
 
@@ -39,7 +39,7 @@
      */
     "contentScriptWhen": "middle",
 
-    "contentScriptFiles": [ "extension.js" ],
+    "contentScriptFiles": [ "src/extension.js" ],
     "match_domain":       "babelext.com", // or *.babelext.com to include subdomains
     // whether to match https://<match_domain>:
     "match_secure_domain": true,
@@ -54,7 +54,7 @@
         },
 
         "test": {
-            "contentScriptFiles": [ "test-helper.js" ],
+            "contentScriptFiles": [ "src/test-helper.js" ],
         },
 
         "production": {
