@@ -459,7 +459,6 @@ function build_safari() {
         var script = document.createElement("string");
         script.textContent = file;
 
-
         if ( file == 'lib/BabelExt.js' || when_string[ settings.contentScriptWhen ] == 'Start' ) {
             start_scripts.appendChild( document.createTextNode('\n\t\t\t\t') );
             start_scripts.appendChild(script);
@@ -471,6 +470,22 @@ function build_safari() {
 
     start_scripts.appendChild( document.createTextNode('\n\t\t\t') );
       end_scripts.appendChild( document.createTextNode('\n\t\t\t') );
+
+    var stylesheets = get_node('Stylesheets');
+
+    while (stylesheets.firstChild) stylesheets.removeChild(stylesheets.firstChild);
+
+    settings.contentStyleFiles.forEach(function(file) {
+        hardLink( file, 'build/Safari.safariextension/' + file )
+
+        var sheet = document.createElement("string");
+        sheet.textContent = file;
+
+        stylesheets.appendChild( document.createTextNode('\n\t\t\t') );
+        stylesheets.appendChild(sheet);
+    });
+
+    stylesheets.appendChild( document.createTextNode('\n\t\t') );
 
     var xml_txt = '<?xml version="1.0" encoding="UTF-8"?>\n' + new XMLSerializer().serializeToString(document).replace(">",">\n") + "\n";
     fs.write( 'build/Safari.safariextension/Info.plist', xml_txt );
@@ -524,7 +539,9 @@ function build_firefox() {
     fs.makeDirectory('build/Firefox/data/lib');
     fs.makeDirectory('build/Firefox/icons');
 
-    settings.contentScriptFiles.forEach(function(file) { symbolicLink( file, 'build/Firefox/data/' + file ) });
+    var contentFiles = settings.contentScriptFiles.concat( settings.contentStyleFiles || [] );
+
+    contentFiles.forEach(function(file) { symbolicLink( file, 'build/Firefox/data/' + file ) });
 
     // Create settings.js:
     fs.write(
@@ -534,7 +551,8 @@ function build_firefox() {
           :  'exports.include = ["http://' + settings.match_domain + '/*"];\n'
         ) +
         'exports.contentScriptWhen = "' + when_string[settings.contentScriptWhen] + '";\n' +
-        'exports.contentScriptFile = ' + JSON.stringify(settings.contentScriptFiles) + ";\n"
+        'exports.contentScriptFile = ' + JSON.stringify(settings.contentScriptFiles) + ";\n" +
+        'exports.contentStyleFile = ' + JSON.stringify(settings.contentStyleFiles || []) + ";\n"
         ,
         'w'
     );
@@ -613,7 +631,7 @@ function build_firefox() {
                 'build/firefox-unpacked/install.rdf',
                 fs.read('build/firefox-unpacked/install.rdf').replace( /<em:maxVersion>.*<\/em:maxVersion>/, '<em:maxVersion>' + settings.firefox_max_version + '</em:maxVersion>' )
             );
-            settings.contentScriptFiles.forEach(function(file) {
+            contentFiles.forEach(function(file) {
                 fs.remove('build/firefox-unpacked/resources/'+settings.name+'/data/'+file);
                 symbolicLink( file, 'build/firefox-unpacked/resources/'+settings.name+'/data/'+file )
             });
@@ -664,6 +682,15 @@ function build_chrome() {
 	    "notifications"
 	]
     };
+
+    var contentFiles = settings.contentScriptFiles.concat(
+        Object.keys(settings.icons).map(function(key) { return settings.icons[key] })
+    );
+    if ( settings.contentStyleFiles ) {
+        manifest.content_scripts[0].css = settings.contentStyleFiles;
+        contentFiles = contentFiles.concat( settings.contentStyleFiles );
+    }
+
 
     var extra_files = [];
 
@@ -749,8 +776,7 @@ function build_chrome() {
     fs.makeDirectory('build/Chrome/lib');
 
     // Copy scripts and icons into place:
-    settings.contentScriptFiles.forEach(function(file) { hardLink( file               , 'build/Chrome/' + file                ) });
-    Object.keys(settings.icons).forEach(function(key ) { hardLink( settings.icons[key], 'build/Chrome/' + settings.icons[key] ) });
+    contentFiles.forEach(function(file) { hardLink( file               , 'build/Chrome/' + file                ) });
 
     program_counter.begin();
 
@@ -778,8 +804,7 @@ function build_chrome() {
                 'zip',
                 ['out/chrome-store-upload.zip','build/Chrome/background.js','build/Chrome/manifest.json']
                     .concat( extra_files )
-                    .concat( settings.contentScriptFiles.map(function(file) { return 'build/Chrome/'+file }) )
-                    .concat( Object.keys(settings.icons).map(function(key ) { return 'build/Chrome/' + settings.icons[key] }) )
+                    .concat( contentFiles.map(function(file) { return 'build/Chrome/'+file }) )
                 ,
                 null,
                 function(err,stdout,stderr) {

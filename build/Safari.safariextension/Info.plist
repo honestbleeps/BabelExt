@@ -64,6 +64,10 @@
 				<string>BabelExt.js</string>
 			</array>
 		</dict>
+		<key>Stylesheets</key>
+		<array>
+			<string>src/extension.css</string>
+		</array>
 	</dict>
 	<key>Description</key>
 	<string>An extension created with BabelExt - www.babelext.com</string>

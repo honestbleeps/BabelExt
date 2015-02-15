@@ -40,6 +40,7 @@
     "contentScriptWhen": "middle",
 
     "contentScriptFiles": [ "src/extension.js" ],
+    "contentStyleFiles": [ "src/extension.css" ],
     "match_domain":       "babelext.com", // or *.babelext.com to include subdomains
     // whether to match https://<match_domain>:
     "match_secure_domain": true,

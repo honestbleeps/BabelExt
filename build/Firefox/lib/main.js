@@ -50,6 +50,7 @@ pageMod.PageMod({
   include: settings.include,
   contentScriptWhen: settings.contentScriptWhen,
   contentScriptFile: settings.contentScriptFile.map(function(file) { return self.data.url(file) }),
+  contentStyleFile: settings.contentStyleFile.map(function(file) { return self.data.url(file) }),
   onAttach: function(worker) {
 	tabs.on('activate', function(tab) {
 		// run some code when a tab is activated...
