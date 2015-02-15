@@ -434,10 +434,12 @@ function build_safari() {
 
     var match_domains = get_node('Allowed Domains');
     while (match_domains.firstChild) match_domains.removeChild(match_domains.firstChild);
-    var domain = document.createElement("string");
-    domain.textContent = settings.match_domain;
-    match_domains.appendChild( document.createTextNode('\n\t\t\t\t') );
-    match_domains.appendChild(domain);
+    settings.match_domains.forEach(function(match_domain) {
+        var domain = document.createElement("string");
+        domain.textContent = match_domain;
+        match_domains.appendChild( document.createTextNode('\n\t\t\t\t') );
+        match_domains.appendChild(domain);
+    });
     match_domains.appendChild( document.createTextNode('\n\t\t\t') );
 
     var match_secure_domain = get_node('Include Secure Pages');
@@ -546,10 +548,15 @@ function build_firefox() {
     // Create settings.js:
     fs.write(
         'build/Firefox/lib/settings.js',
-        ( settings.match_secure_domain
-          ? 'exports.include = ["http://' + settings.match_domain + '/*","https://' + settings.match_domain + '/*"];\n'
-          :  'exports.include = ["http://' + settings.match_domain + '/*"];\n'
-        ) +
+        'exports.include = [' +
+        settings.match_domains.map(function(domain) {
+            return (
+                settings.match_secure_domain
+                ? '"http://' + domain + '/*","https://' + domain + '/*"'
+                : '"http://' + domain + '/*"'
+            )
+        }).join(',') +
+        '];\n' +
         'exports.contentScriptWhen = "' + when_string[settings.contentScriptWhen] + '";\n' +
         'exports.contentScriptFile = ' + JSON.stringify(settings.contentScriptFiles) + ";\n" +
         'exports.contentStyleFile = ' + JSON.stringify(settings.contentStyleFiles || []) + ";\n"
@@ -655,7 +662,9 @@ function build_chrome() {
         'late'  : 'document_idle'
     };
 
-    var match_url = ( settings.match_secure_domain ? "*://" : "http://" ) + settings.match_domain + '/*';
+    var match_urls = settings.match_domains.map(function(domain) {
+        return ( settings.match_secure_domain ? "*://" : "http://" ) + domain + '/*';
+    });
 
     var manifest = {
         "name": settings.title,
@@ -668,19 +677,18 @@ function build_chrome() {
 	},
 	"content_scripts": [
 	    {
-		"matches": [ match_url ],
+		"matches": match_urls,
 		"js": settings.contentScriptFiles,
 		"run_at": when_string[settings.contentScriptWhen]
 	    }
 	],
 	"icons": settings.icons,
-	"permissions": [
-            match_url,
+	"permissions": match_urls.concat([
 	    "contextMenus",
 	    "tabs",
 	    "history",
 	    "notifications"
-	]
+	])
     };
 
     var contentFiles = settings.contentScriptFiles.concat(
