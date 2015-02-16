@@ -105,7 +105,7 @@ function _waitForEvent( test, callback ) { // low-level interface - see waitFor*
 
     // originally based on http://newspaint.wordpress.com/2013/04/05/waiting-for-page-to-load-in-phantomjs/
 
-    var timeout = 10000;
+    var timeout = 20000;
     var expiry = new Date().getTime() + timeout;
 
     var interval = setInterval(checkEvent,100);
