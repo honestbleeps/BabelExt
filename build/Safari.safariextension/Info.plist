@@ -5,11 +5,11 @@
 	<key>Author</key>
 	<string>honestbleeps</string>
 	<key>Builder Version</key>
-	<string>8536.30.1</string>
+	<string>8537.85.12.18</string>
 	<key>CFBundleDisplayName</key>
 	<string>BabelExt</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.honestbleeps.abcdef01-2345-6789-9876-543210fedcba</string>
+	<string>com.honestbleeps.abcdefghijklmnopqabcdefghijklmnopqabcdefghij</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleShortVersionString</key>
@@ -71,6 +71,8 @@
 	</dict>
 	<key>Description</key>
 	<string>An extension created with BabelExt - www.babelext.com</string>
+	<key>DeveloperIdentifier</key>
+	<string>ABCDEFGHIJ</string>
 	<key>ExtensionInfoDictionaryVersion</key>
 	<string>1.0</string>
 	<key>Permissions</key>

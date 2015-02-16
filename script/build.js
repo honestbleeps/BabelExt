@@ -3,7 +3,7 @@
 /*
  * Phantom JS build script
  *
- * Usage: phantomjs <build|release>
+ * Usage: phantomjs <build|release> <firefox|chrome|safari>
  *
  *
  * PhantomJS is a headless web browser, which allows us to automate
@@ -303,7 +303,7 @@ function page( url, callback ) {
 
         if ( settings.data     ) args = args.concat([ '-d', settings.data     ]);
         if ( settings.out_file ) args = args.concat([ '-o', settings.out_file ]);
-        if ( settings.cookies  ) args = args.concat([ '-c', settings.cookies  ]);
+        if ( settings.cookies  ) args = args.concat([ '-H', 'Cookie: ' + settings.cookies  ]);
 
         childProcess.execFile( 'curl', args, null, callback );
     }
@@ -441,7 +441,7 @@ function get_changelog(callback) { // call the callback with the changelog text 
  * BUILD COMMANDS
  */
 
-function build_safari() {
+function build_safari(login_info) {
 
     var when_string = {
         'early' : 'Start',
@@ -462,14 +462,40 @@ function build_safari() {
         get_node(key).textContent = value;
     }
 
+    /*
+     * PART ONE: build the Safari.safariextension directory:
+     */
+
+    // BabelExt IDs are UUIDs, but Safari IDs must be alphabetical:
+    var map = {
+        '0': 'a',
+        '1': 'b',
+        '2': 'c',
+        '3': 'd',
+        '4': 'e',
+        '5': 'f',
+        '6': 'g',
+        '7': 'h',
+        '8': 'i',
+        '9': 'j',
+        'a': 'k',
+        'b': 'l',
+        'g': 'm',
+        'd': 'n',
+        'e': 'o',
+        'f': 'p',
+        '-': 'q'
+    };
+
     get_node('Author').textContent = settings.author;
 
     get_node('CFBundleDisplayName'       ).textContent = settings.title;
-    get_node('CFBundleIdentifier'        ).textContent = 'com.honestbleeps.' + settings.id;
+    get_node('CFBundleIdentifier'        ).textContent = 'com.honestbleeps.' + settings.id.replace( /(.)/g, function(char) { return map[char] });
     get_node('CFBundleShortVersionString').textContent = settings.version;
     get_node('CFBundleVersion'           ).textContent = settings.version;
     get_node('Description'               ).textContent = settings.description;
     get_node('Website'                   ).textContent = settings.website;
+    get_node('DeveloperIdentifier'       ).textContent = settings.safari_team_id || '(not set)';
 
     var match_domains = get_node('Allowed Domains');
     while (match_domains.firstChild) match_domains.removeChild(match_domains.firstChild);
@@ -562,6 +588,171 @@ function build_safari() {
             '</plist>\n',
             'w'
         );
+
+
+    /*
+     * PART TWO: build a signed .safariextz file
+     */
+
+    program_counter.begin();
+
+    if ( fs.exists('build/safari-certs/AppleWWDRCA.cer') ) {
+        check_xar();
+    } else {
+
+        if ( !login_info || login_info.skip ) {
+            console.log( 'Please add Safari login details to local_settings.json to build a Safari package' );
+            return program_counter.end(0);
+        }
+
+        if ( !login_info.password ) {
+            if ( system.env.hasOwnProperty('APPLE_PASSWORD') ) {
+                login_info.password = system.env.APPLE_PASSWORD;
+            } else {
+                console.log("Please specify a password for apple.com");
+                return program_counter.end(1);
+            }
+        }
+
+        if ( !fs.exists('build/safari-certs/id.rsa') ) {
+            console.log(
+                "Please generate a private key and Certificater Signature Request.\n" +
+                "The private key should not have an associated password.\n" +
+                "Example command:\n" +
+                "openssl req -new -nodes -newkey rsa:2048 -keyout build/safari-certs/id.rsa -out build/safari-certs/request.csr"
+            );
+            return program_counter.end(1);
+        }
+
+        console.log( 'Generating keys...' );
+        page( 'https://developer.apple.com/account/safari/certificate/certificateRequest.action', function(page) {
+
+            var onError = page.onError;
+            page.onError = function(msg, trace) {
+                // Ignore expected error
+                if ( msg != "TypeError: 'undefined' is not an object (evaluating 'document.form1.submit')" ) {
+                    onError.call( page, msg, trace );
+                }
+            };
+
+            page.submit_form(
+                '#submitButton2',
+                {
+                    '#accountname'    : login_info.username,
+                    '#accountpassword': login_info.password
+                },
+                function() {
+                    page.onError = onError;
+                    page.waitForElementsPresent(
+                        [ 'form[name="certificateRequest"]' ],
+                        function() {
+                            page.click('a.submit');
+                            page.waitForElementsPresent(
+                                [ '#certificateSubmit' ],
+                                function() {
+
+                                    page.submit_form(
+                                        'a.submit',
+                                        {
+                                            'input[name="upload"]': 'build/safari-certs/request.csr',
+                                        },
+                                        function() {
+                                            page.waitForElementsPresent(
+                                                [ '.downloadForm' ],
+                                                function() {
+                                                    var download_url = page.evaluate(function() {
+                                                        return document.getElementsByClassName('blue')[0].getAttribute('href')
+                                                    });
+                                                    var cookies = page.cookies.map(function(cookie) { return cookie.name + '=' + cookie.value });
+                                                    page.openBinary( 'https://developer.apple.com' + download_url, { cookies: cookies.join('; '), out_file: 'build/safari-certs/local.cer' }, function() {
+                                                        page.openBinary(    'https://www.apple.com/appleca/AppleIncRootCertificate.cer', { out_file: 'build/safari-certs/AppleIncRootCertificate.cer' }, function() {
+                                                            page.openBinary('https://developer.apple.com/certificationauthority/AppleWWDRCA.cer', { out_file: 'build/safari-certs/AppleWWDRCA.cer' }, check_xar );
+                                                        });
+                                                    });
+                                                });
+                                        });
+                                }
+                            );
+                        }
+                    );
+                }
+            );
+
+        });
+
+    }
+
+    function check_xar() {
+        page( 'http://mackyle.github.io/xar/', function(page) {
+
+            var xar_url = page.evaluate(function() {
+                return document.getElementsByClassName('down')[0].parentNode.getAttribute('href')
+            });
+
+            if ( fs.exists('build/xar-url.txt') && fs.read('build/xar-url.txt') == xar_url ) {
+                console.log( 'XAR is up-to-date.' );
+                build_safariextz();
+            } else {
+                console.log( 'Downloading xar archiver...' );
+                page.openBinary(xar_url, { out_file: 'temporary_file.tar.gz' }, function() {
+                    console.log( 'Unpacking xar archiver...', status );
+                    if ( fs.exists( 'build/xar' ) ) fs.removeTree('build/xar');
+                    fs.makeDirectory('build/xar');
+                    childProcess.execFile( 'tar', ["zxf",'temporary_file.tar.gz','-C','build/xar','--strip-components=1'], null, function(err,stdout,stderr) {
+                        console.log( 'Building xar archiver...', status );
+                        if ( system.os.name == 'windows' ) {
+                            // TODO: fill in real Windows values here (the following line is just a guess):
+                            childProcess.execFile( 'cmd' , [    'cd build\\xar  ; ./configure  ; make'], null, finalise_xar );
+                        } else {
+                            childProcess.execFile( 'bash', ['-c','cd build/xar && ./configure && make'], null, finalise_xar );
+                        }
+
+                        function finalise_xar(err,stdout,stderr) {
+                            fs.remove('temporary_file.tar.gz');
+                            fs.write( 'build/xar-url.txt', xar_url, 'w' );
+                            build_safariextz();
+                        }
+
+                    });
+                });
+            }
+
+        });
+    }
+
+    function build_safariextz() {
+
+        function run_commands(commands, then) {
+            function run_command(err, stdout, stderr) {
+                if ( commands.length ) {
+                    var command = commands.shift();
+                    return childProcess.execFile( command[0], command.splice(1), null, run_command );
+                } else {
+                    return then(err, stdout, stderr)
+                }
+            }
+            run_command();
+        }
+
+        fs.changeWorkingDirectory('build');
+
+        var xar = './xar/src/xar';
+        var safariextz = '../out/' + settings.name + '.safariextz';
+
+        run_commands([
+            [ xar, '-czf', safariextz, '--distribution', 'Safari.safariextension' ],
+            [ xar,   '-f', safariextz, '--sign', '--digestinfo-to-sign', 'safari-certs/tmp.dat', '--sig-size', 256, '--cert-loc', 'safari-certs/local.cer', '--cert-loc', 'safari-certs/AppleWWDRCA.cer', '--cert-loc', 'safari-certs/AppleIncRootCertificate.cer' ],
+            [ 'openssl', 'rsautl', '-sign', '-inkey', 'safari-certs/id.rsa', '-in', 'safari-certs/tmp.dat', '-out', 'safari-certs/tmp.sig' ],
+            [ xar,   '-f', safariextz, '--inject-sig', 'safari-certs/tmp.sig' ]
+        ], function() {
+            fs.remove('safari-certs/tmp.dat');
+            fs.remove('safari-certs/tmp.sig');
+            fs.changeWorkingDirectory('..');
+            console.log('Built ' + safariextz.substr(3));
+            return program_counter.end(0);
+        });
+    }
+
 
 }
 
@@ -676,7 +867,7 @@ function build_firefox() {
             });
             fs.changeWorkingDirectory('build/firefox-unpacked');
             childProcess.execFile( 'zip', ['../'+xpi,'install.rdf'], null, function(err,stdout,stderr) {
-                fs.changeWorkingDirectory('..');
+                fs.changeWorkingDirectory('../..');
                 if ( stderr != '' ) { console.log(stderr.replace(/\n$/,'')); return program_counter.end(1); }
                 console.log('Built ' + xpi + '\n\033[1mRemember to restart Firefox if you added/removed any files!\033[0m');
                 return program_counter.end(0);
@@ -1223,15 +1414,10 @@ function release_opera(login_info) {
 }
 
 function release_safari() {
-    /*
-     * Safari support is limited at the moment, as it's the least-used browser and the hardest to support.
-     *
-     * To release a Safari extension, start here: https://developer.apple.com/programs/safari/
-     * For instructions on building a Safari extension package on the command line, start here: http://developer.streak.com/2013/01/how-to-build-safari-extension-using.html
-     *
-     * Patches welcome!
-     *
-     */
+    console.log(
+        'The Safari extensions gallery just links to your actual download site.\n' +
+        'This function is included only for completeness'
+    );
 }
 
 /*
@@ -1242,26 +1428,28 @@ var args = system.args;
 
 function usage() {
     console.log(
-        'Usage: ' + args[0] + ' <command> [<arguments>]\n' +
+        'Usage: ' + args[0] + ' <command> <build|release> <firefox|chrome|safari>\n' +
         'Commands:\n' +
-        '    build - builds extensions for all browsers\n' +
-        '    release <target> - release extension to either "amo" (addons.mozilla.org) "chrome" (Chrome store) or "opera" (Opera site)'
+        '    build <target> - builds extensions for "amo" (Firefox) "chrome" or "safari"\n' +
+        '    release <target> - release extension to "amo" (addons.mozilla.org) "chrome" (Chrome store), "opera" (opera site) or "safari" (extensions gallery)'
     );
     phantom.exit(1);
 }
 
 program_counter.begin();
+if ( args.length != 3 ) usage();
+
 switch ( args[1] || '' ) {
 
 case 'build':
-    if ( args.length != 2 ) usage();
-    build_safari();
-    build_firefox();
-    build_chrome ();
+    switch ( args[2] ) {
+    case 'firefox': build_firefox(local_settings.   amo_login_info); break;
+    case 'chrome' : build_chrome (local_settings.chrome_login_info); break;
+    case 'safari' : build_safari (local_settings.safari_login_info); break;
+    }
     break;
 
 case 'release':
-    if ( args.length != 3 ) usage();
     switch ( args[2] ) {
     case 'amo'   : release_amo   (local_settings.   amo_login_info); break;
     case 'chrome': release_chrome(local_settings.chrome_login_info); break;

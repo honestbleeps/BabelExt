@@ -1,6 +1,9 @@
 /build/firefox-unpacked
 /build/firefox-addon-sdk-url.txt
 /build/firefox-addon-sdk
+/build/safari-certs/
+/build/xar-url.txt
+/build/xar/
 /conf/local_settings.json
 /build/Chrome.pem
 /out
