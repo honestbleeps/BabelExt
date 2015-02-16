@@ -143,11 +143,9 @@ function _waitForElementsPresent( selectors, callback ) { // call callback when 
 
     return this.waitForEvent(
         function() {
-            var missing_elements = [];
-            selectors.forEach(
+            var missing_elements = selectors.filter(
                 function(selector) {
-                    if ( ! page.evaluate(function(selector) {return document.querySelector(selector)}, selector ) )
-                        missing_elements.push(selector);
+                    return ! page.evaluate(function(selector) { return document.querySelector(selector) }, selector );
                 }
             );
             if ( missing_elements.length )
