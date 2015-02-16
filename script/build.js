@@ -39,19 +39,48 @@ phantom.onError = function(msg, trace) {
 };
 
 /*
+ * Replace PhantomJS' execFile() with something more useful:
+ */
+var execFile = childProcess.execFile;
+childProcess.execFile = function(cmd, args, opts, cb) {
+
+    // need to check both the callback and value of "exit":
+    var calls = 0, err, stdout, stderr, code;
+
+    // run the command and get stdout/stderr:
+    var ctx = execFile.call( childProcess, cmd, args, opts, function(_err,_stdout,_stderr) {
+        err    = _err;
+        stdout = _stdout;
+        stderr = _stderr;
+        if ( calls++ ) run_callback();
+    });
+
+    // also get the exit code:
+    ctx.on("exit", function (_code) {
+        code = _code;
+        if ( calls++ ) run_callback();
+    });
+
+    // once we've got all the information, print STDERR and continue if there was no error:
+    function run_callback() {
+        if ( stderr != '' ) console.log(stderr.replace(/\n$/,''));
+        if ( code ) program_counter.end(code);
+        else if ( cb ) cb(null, stdout, stderr, code);
+    }
+
+    return ctx;
+}
+
+/*
  * Create a symbolic link from source to target
  */
 function symbolicLink( source, target ) {
     target.replace(/\//g, function() { source = '../' + source });
     if ( ! fs.isLink(target) ) {
         if ( system.os.name == 'windows' ) {
-            childProcess.execFile('mklink', [target,source], function(err, stdout, stderr) {
-                if ( stderr != '' ) console.log(stderr.replace(/\n$/,''));
-            });
+            childProcess.execFile('mklink',  [target,source] );
         } else {
-            childProcess.execFile('ln', ["-s",source,target], null, function(err, stdout, stderr) {
-                if ( stderr != '' ) console.log(stderr.replace(/\n$/,''));
-            });
+            childProcess.execFile('ln', ["-s",source,target] );
         }
     }
 }
@@ -62,13 +91,9 @@ function symbolicLink( source, target ) {
 function hardLink( source, target ) {
     if ( fs.exists(target) ) fs.remove(target);
     if ( system.os.name == 'windows' ) {
-        childProcess.execFile('mklink', ['/H',target,source], function(err, stdout, stderr) {
-            if ( stderr != '' ) console.log(stderr.replace(/\n$/,''));
-        });
+        childProcess.execFile('mklink', ['/H',target,source]);
     } else {
-        childProcess.execFile('ln', [source,target], null, function(err, stdout, stderr) {
-            if ( stderr != '' ) console.log(stderr.replace(/\n$/,''));
-        });
+        childProcess.execFile('ln'    ,      [source,target]);
     }
 }
 
@@ -280,6 +305,7 @@ function page( url, callback ) {
 
         if ( settings.data     ) args = args.concat([ '-d', settings.data     ]);
         if ( settings.out_file ) args = args.concat([ '-o', settings.out_file ]);
+        if ( settings.cookies  ) args = args.concat([ '-c', settings.cookies  ]);
 
         childProcess.execFile( 'curl', args, null, callback );
     }
@@ -403,8 +429,6 @@ function get_changelog(callback) { // call the callback with the changelog text 
         local_settings.changelog_command.splice(1),
         null,
         function(err,changelog,stderr) {
-            if ( stderr != '' ) console.log(stderr.replace(/\n$/,''));
-            if (err) throw err;
             if ( changelog == '' ) {
                 console.log( "Error: empty changelog" );
                 return program_counter.end(1);
@@ -614,7 +638,6 @@ function build_firefox() {
             page.openBinary( response.redirectURL, { out_file: 'temporary_file.tar.gz' }, function() {
                 fs.makeDirectory('build/firefox-addon-sdk');
                 childProcess.execFile( 'tar', ["zxf",'temporary_file.tar.gz','-C','build/firefox-addon-sdk','--strip-components=1'], null, function(err,stdout,stderr) {
-                    if ( stderr != '' ) { console.log(stderr.replace(/\n$/,'')); return program_counter.end(1); }
                     fs.remove('temporary_file.tar.gz');
                     fs.write( 'build/firefox-addon-sdk-url.txt', response.redirectURL, 'w' );
                     build_xpi();
@@ -638,7 +661,6 @@ function build_firefox() {
 
     // Move the .xpi into place, fix its install.rdf, and update firefox-unpacked:
     function finalise_xpi(err, stdout, stderr) {
-        if ( stderr != '' ) { console.log(stderr.replace(/\n$/,'')); return program_counter.end(1); }
         fs.makeDirectory('out');
         var xpi = 'out/' + settings.name + '.xpi';
         if ( fs.exists(xpi) ) fs.remove(xpi);
@@ -646,7 +668,6 @@ function build_firefox() {
         fs.removeTree('build/firefox-unpacked');
         fs.makeDirectory('build/firefox-unpacked');
         childProcess.execFile( 'unzip', ['-d','build/firefox-unpacked',xpi], null, function(err,stdout,stderr) {
-            if ( stderr != '' ) { console.log(stderr.replace(/\n$/,'')); return program_counter.end(1); }
             fs.write(
                 'build/firefox-unpacked/install.rdf',
                 fs.read('build/firefox-unpacked/install.rdf').replace( /<em:maxVersion>.*<\/em:maxVersion>/, '<em:maxVersion>' + settings.firefox_max_version + '</em:maxVersion>' )
@@ -805,16 +826,12 @@ function build_chrome() {
     if (fs.exists('build/Chrome.pem')) {
         build_crx();
     } else {
-        childProcess.execFile(chrome_command, ["--pack-extension=build/Chrome"], null, function (err, stdout, stderr) {
-            if ( stderr != '' ) { console.log(stderr.replace(/\n$/,'')); return program_counter.end(1); }
-            build_crx();
-        });
+        childProcess.execFile(chrome_command, ["--pack-extension=build/Chrome"], null, build_crx );
     };
 
     // Build the .crx, move it into place, and build the upload zip file:
     function build_crx() {
         childProcess.execFile(chrome_command, ["--pack-extension=build/Chrome","--pack-extension-key=build/Chrome.pem"], null, function (err, stdout, stderr) {
-            if ( stderr != '' ) { console.log(stderr.replace(/\n$/,'')); return program_counter.end(1); }
             if ( stdout != 'Created the extension:\n\nbuild/Chrome.crx\n' ) console.log(stdout.replace(/\n$/,''));
             var crx = 'out/' + settings.name + '.crx';
             if ( fs.exists(crx) ) fs.remove(crx);
@@ -829,7 +846,6 @@ function build_chrome() {
                 ,
                 null,
                 function(err,stdout,stderr) {
-                    if ( stderr != '' ) { console.log(stderr.replace(/\n$/,'')); return program_counter.end(1); }
                     console.log('Built out/chrome-store-upload.zip');
                     return program_counter.end(0);
                 }
@@ -1102,6 +1118,8 @@ function release_chrome(login_info) {
         }
 
         function upload_and_publish(data) {
+
+            data = JSON.parse(data);
 
             var page = webPage.create();
             page.customHeaders = {
