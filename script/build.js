@@ -267,6 +267,23 @@ function page( url, callback ) {
 
     page.settings.loadImages = false;
 
+    page.openBinary = function(url, settings, callback) {
+
+        // PhantomJS refuses to download chunked data, do it with `curl` instead (TODO: make this work in Windows):
+
+        if ( !callback ) {
+            callback = settings;
+            settings = {};
+        }
+
+        var args = [ "--silent", url, '-L' ];
+
+        if ( settings.data     ) args = args.concat([ '-d', settings.data     ]);
+        if ( settings.out_file ) args = args.concat([ '-o', settings.out_file ]);
+
+        childProcess.execFile( 'curl', args, null, callback );
+    }
+
     return page.open( url, function(status) {
         if (status == 'success') {
             callback(page);
@@ -594,11 +611,7 @@ function build_firefox() {
             build_xpi();
         } else {
             console.log( 'Downloading Firefox Addon SDK...' );
-            // PhantomJS refuses to download any file as large as the SDK (I think it's either about the encoding or the file size)
-            // do it with `curl` instead:
-            console.log( 'Unpacking Firefox Addon SDK...', status );
-            childProcess.execFile( 'curl', ['--silent',response.redirectURL,'-o','temporary_file.tar.gz'], null, function(err, stdout, stderr) {
-                if ( stderr != '' ) { console.log(stderr.replace(/\n$/,'')); return program_counter.end(1); }
+            page.openBinary( response.redirectURL, { out_file: 'temporary_file.tar.gz' }, function() {
                 fs.makeDirectory('build/firefox-addon-sdk');
                 childProcess.execFile( 'tar', ["zxf",'temporary_file.tar.gz','-C','build/firefox-addon-sdk','--strip-components=1'], null, function(err,stdout,stderr) {
                     if ( stderr != '' ) { console.log(stderr.replace(/\n$/,'')); return program_counter.end(1); }
@@ -1085,12 +1098,7 @@ function release_chrome(login_info) {
 
         function get_auth_key(code) {
             var post_data = "grant_type=authorization_code&redirect_uri=urn:ietf:wg:oauth:2.0:oob&client_id=" + login_info.client_id + "&client_secret=" + login_info.client_secret + "&code=" + code;
-
-            // PhantomJS refuses to download chunked data, do it with `curl` instead:
-            childProcess.execFile( 'curl', ["--silent","https://accounts.google.com/o/oauth2/token",'-d',post_data], null, function(err, json, stderr) {
-                if ( stderr != '' ) { console.log(stderr.replace(/\n$/,'')); return program_counter.end(1); }
-                upload_and_publish( JSON.parse(json) );
-            });
+            page.openBinary( 'https://accounts.google.com/o/oauth2/token', { data:  post_data }, upload_and_publish );
         }
 
         function upload_and_publish(data) {
