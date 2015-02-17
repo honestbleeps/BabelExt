@@ -63,7 +63,7 @@ thought to how to make it more universally useful.
 
 First, download all of the source from Github and put it together within a folder.
 
-Then, download PhantomJS (http://phantomjs.org), which is used to build and deploy extensions.
+Then, download [PhantomJS](http://phantomjs.org), which is used to build and deploy extensions.
 
 In UNIX-based OSes, run `./script/build.sh build <browser>` to build packages for each browser,
 and `./script/build.sh release <site>` to release them to the various extension sites.
@@ -152,7 +152,7 @@ Note: some online documentation refers to these keys as `cert00`, `cert01` and `
 ## Resetting extension data ##
 
 If your extension uses storage or preferences, you will need to test the extension data with
-different stored values.  Apart from Safari, all the browsers let you creat add multiple
+different stored values.  Apart from Safari, all the browsers let you create multiple
 profiles ("users" in Chrome), so you might want to create throwaway profiles for use during
 testing.
 
@@ -165,5 +165,5 @@ extension data by deleting all files matching <profile_directory>/Local*/*<exten
 You need to release the first version of your extension by hand, because each site has slightly
 different requirements for their extensions.
 
-After the initial release, fill in local_settings.json and run `script/build.js` with the "release"
-command to release and update metadata.
+After the initial release, fill in `local_settings.json` and run `script/build.sh release <site>`
+to release and update metadata.
