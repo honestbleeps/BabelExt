@@ -9,6 +9,7 @@
 /build/Chrome
 /build/Firefox/*.png
 /build/Firefox/data
+/build/Firefox/icons
 /build/Safari.safariextension
 
 # output directory:
