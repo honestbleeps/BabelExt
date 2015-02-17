@@ -98,6 +98,43 @@ function hardLink( source, target ) {
 }
 
 /*
+ * Return information about the specified files.
+ * Currently returns an array of { name: ..., id: ..., modified: ... }
+ * 'name' is the passed-in name, 'id' is the file's inode, and 'modified' is the modification time relative to the epoch.
+ */
+function stat( files, callback ) {
+    // TODO: no idea how you'd do this on Windows
+    files = files.filter( fs.exists );
+    childProcess.execFile( 'stat', [ '--printf=%i %Y\n' ].concat(files), null, function(err,stdout,stderr) {
+        var lines = stdout.split("\n");
+        lines.pop(); // eat trailing newline
+        callback( lines.map(function(line, index) {
+            var rows = line.split(' ');
+            return { name: files[index], id: rows[0], modified: rows[1] };
+        }) );
+    });
+}
+
+/*
+ * Build a resources.js file
+ */
+function build_resources() {
+    if ( settings.resources ) {
+        var resources = {};
+        settings.resources.forEach(function(filename) {
+            resources[filename] = fs.open(filename, 'r').read();
+        });
+        fs.write(
+            'lib/BabelExtResources.js', "BabelExt.resources._resources = " +
+                // prettify our JavaScript a bit, for the benefit of reviewers:
+                JSON.stringify(resources, null, ' ').replace( /\\n(?!")/g, "\\n\" +\n    \"" ) + ";\n",
+            'w'
+        );
+        return true;
+    }
+}
+
+/*
  * Utility functions for pages
  */
 
@@ -336,70 +373,74 @@ var program_counter = new AsyncCounter(function(errors) { phantom.exit(errors||0
  * Load settings from conf/settings.json
  */
 var settings;
-try {
-    settings = eval('('+fs.read('conf/settings.json')+')');
-} catch (e) {
-    console.error(
-        "Error in conf/settings.json: " + e + "\n" +
-        "Please make sure the file is formatted correctly and try again."
-    );
-    phantom.exit(1);
-}
-if ( system.env.hasOwnProperty('ENVIRONMENT') ) {
-    var environment_specific = settings.environment_specific[ system.env.ENVIRONMENT ];
-    if ( !environment_specific ) {
-        console.log(
-            'Please specify one of the following build environments: ' +
-            Object.keys(settings.environment_specific).join(' ')
+function update_settings() {
+
+    try {
+        settings = eval('('+fs.read('conf/settings.json')+')');
+    } catch (e) {
+        console.error(
+            "Error in conf/settings.json: " + e + "\n" +
+            "Please make sure the file is formatted correctly and try again."
         );
         phantom.exit(1);
     }
-    Object.keys(environment_specific)
-        .forEach(function(property, n, properties) {
-            settings[ property ] =
-                ( Object.prototype.toString.call( settings[ property ] ) === '[object Array]' )
-                ? settings[ property ].concat( environment_specific[property] )
-                : environment_specific[property]
-            ;
-        });
-} else if ( settings.environment_specific ) {
-    console.log(
-        'Please specify build environment using the ENVIRONMENT environment variable,\n' +
-        'or comment out the "environment_specific" section in settings.json'
-    );
-    phantom.exit(1);
-};
-settings.contentScriptFiles.unshift('lib/BabelExt.js');
-delete settings.environment_specific;
-
-if (
-    settings.version.search(/^[0-9]+(?:\.[0-9]+){0,3}$/) ||
-    settings.version.split('.').filter(function(number) { return number > 65535 }).length
-) {
-    console.log(
-        'Google Chrome will not accept version number "' + settings.version + '"\n' +
-        'Please specify a version number containing 1-4 dot-separated integers between 0 and 65535'
-    );
-    phantom.exit(1);
-}
-
-settings.preferences.forEach(function(preference) {
-    /*
-     * Known-but-unsupported types:
-     * color - not supported by Safari
-     * file - not supported by Safari
-     * directory - not supported by Safari
-     * control - not supported by Safari, not clear what we'd do with it anyway
-     */
-    if ( preference.type.search(/^(bool|boolint|integer|string|menulist|radio)$/) == -1 ) {
+    if ( system.env.hasOwnProperty('ENVIRONMENT') ) {
+        var environment_specific = settings.environment_specific[ system.env.ENVIRONMENT ];
+        if ( !environment_specific ) {
+            console.log(
+                'Please specify one of the following build environments: ' +
+                Object.keys(settings.environment_specific).join(' ')
+            );
+            phantom.exit(1);
+        }
+        Object.keys(environment_specific)
+            .forEach(function(property, n, properties) {
+                settings[ property ] =
+                    ( Object.prototype.toString.call( settings[ property ] ) === '[object Array]' )
+                    ? settings[ property ].concat( environment_specific[property] )
+                    : environment_specific[property]
+                ;
+            });
+    } else if ( settings.environment_specific ) {
         console.log(
-            'Preference type "' + preference.type + ' is not supported.\n' +
-            'Please specify a valid preference type: bool, boolint, integer, string, menulist, radio\n'
+            'Please specify build environment using the ENVIRONMENT environment variable,\n' +
+            'or comment out the "environment_specific" section in settings.json'
+        );
+        phantom.exit(1);
+    };
+    settings.contentScriptFiles.unshift('lib/BabelExt.js');
+    delete settings.environment_specific;
+
+    if (
+        settings.version.search(/^[0-9]+(?:\.[0-9]+){0,3}$/) ||
+        settings.version.split('.').filter(function(number) { return number > 65535 }).length
+    ) {
+        console.log(
+            'Google Chrome will not accept version number "' + settings.version + '"\n' +
+            'Please specify a version number containing 1-4 dot-separated integers between 0 and 65535'
         );
         phantom.exit(1);
     }
-});
 
+    settings.preferences.forEach(function(preference) {
+        /*
+         * Known-but-unsupported types:
+         * color - not supported by Safari
+         * file - not supported by Safari
+         * directory - not supported by Safari
+         * control - not supported by Safari, not clear what we'd do with it anyway
+         */
+        if ( preference.type.search(/^(bool|boolint|integer|string|menulist|radio)$/) == -1 ) {
+            console.log(
+                'Preference type "' + preference.type + ' is not supported.\n' +
+                'Please specify a valid preference type: bool, boolint, integer, string, menulist, radio\n'
+            );
+            phantom.exit(1);
+        }
+    });
+
+}
+update_settings();
 
 /*
  * Load settings from conf/local_settings.json
@@ -1421,6 +1462,65 @@ function release_safari() {
 }
 
 /*
+ * MAINTAIN COMMANDS
+ */
+
+function maintain() {
+
+    program_counter.begin();
+
+    function maintain_resources() {
+        update_settings();
+        if ( settings.resources )
+            stat( [ 'lib/BabelExtResources.js' ].concat( settings.resources ), function(files) {
+                var resources_file = files.shift();
+                if ( files.filter(function(file) { return file.modified > resources_file.modified } ).length ) {
+                    console.log( 'Rebuilding ' + 'lib/BabelExtResources.js' );
+                    build_resources();
+                }
+                maintain_content_files();
+            });
+        else
+            maintain_content_files();
+    }
+
+    function maintain_content_files() {
+        var files = settings.contentScriptFiles.concat( settings.contentStyleFiles || [] );
+        files = files.concat(
+            files.map(function(name) { return 'build/Chrome/' + name })
+        ).concat(
+            files.map(function(name) { return 'build/Safari.safariextension/' + name })
+        );
+
+        stat( files, function(files) {
+            var id_links = {}, name_links = {}; // list of file IDs that are valid hardlink targets
+            files.forEach(function(file) {
+                if ( file.name.search( '^build/' ) == -1 ) {
+                     // source file - set hardlink target
+                      id_links[ file.id   ] = file;
+                    name_links[ file.name ] = file;
+                } else if ( !id_links.hasOwnProperty(file.id) ) {
+                    var source = name_links[ file.name.replace( /^build\/(?:[^\/]+)\//, '' ) ];
+                    // need to recreate
+                    if ( file.modified > source.modified ) {
+                        console.log( file.name + ' is newer than ' + source.name + ' - please save the built contents back to the original' );
+                    } else {
+                        console.log( 'Relinking ' + file.name + ' to ' + source.name );
+                        fs.remove( file.name );
+                        hardLink(  source.name, file.name );
+                    }
+                }
+            });
+
+        });
+    }
+
+    maintain_resources();
+    setInterval(maintain_resources, settings.maintenanceInterval );
+
+}
+
+/*
  * MAIN SECTION
  */
 
@@ -1437,11 +1537,12 @@ function usage() {
 }
 
 program_counter.begin();
-if ( args.length != 3 ) usage();
 
 switch ( args[1] || '' ) {
 
 case 'build':
+    if ( args.length != 3 ) usage();
+    if ( build_resources() ) settings.contentScriptFiles.splice(1, 0, 'lib/BabelExtResources.js');
     switch ( args[2] ) {
     case 'firefox': build_firefox(local_settings.   amo_login_info); break;
     case 'chrome' : build_chrome (local_settings.chrome_login_info); break;
@@ -1450,12 +1551,18 @@ case 'build':
     break;
 
 case 'release':
+    if ( args.length != 3 ) usage();
     switch ( args[2] ) {
     case 'amo'   : release_amo   (local_settings.   amo_login_info); break;
     case 'chrome': release_chrome(local_settings.chrome_login_info); break;
     case 'opera' : release_opera (local_settings. opera_login_info); break;
     case 'safari': release_safari(local_settings.safari_login_info); break;
     }
+    break;
+
+case 'maintain':
+
+    maintain();
     break;
 
 default:

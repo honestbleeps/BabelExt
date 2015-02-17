@@ -136,6 +136,41 @@
     });
   }
 
+  var setResValueForm = document.getElementById('setResValueForm');
+  if (setResValueForm) {
+    setResValueForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      var keyEle = document.getElementById('setResKey');
+      var valueEle = document.getElementById('setResValue');
+      if (keyEle && valueEle) {
+        var key = keyEle.value;
+        var val = valueEle.value;
+        if ( key == 'myBool' ) val = !!val
+        else if ( key != 'myRadio' && key != 'myString' ) val = parseInt(val,10);
+        BabelExt.resources.set(key, val );
+        var keyEle = document.getElementById('setResKey');
+        var valueEle = document.getElementById('setResValue');
+        keyEle.value = '';
+        valueEle.value = '';
+        alert('value set successfully');
+      }
+    });
+  }
+
+  var getResValueForm = document.getElementById('getResValueForm');
+  if (getResValueForm) {
+    getResValueForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      var keyEle = document.getElementById('getResKey');
+      if (keyEle) {
+        var key = keyEle.value;
+        var val = BabelExt.resources.get(key);
+        var retreivedResValueEle = document.getElementById('retreivedresvalue');
+        retreivedResValueEle.innerHTML = val;
+      }
+    });
+  }
+
   var createTabForm = document.getElementById('createTabForm');
   if (createTabForm) {
     createTabForm.addEventListener('submit', function(e) {

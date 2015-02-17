@@ -34,6 +34,7 @@ has its own function calls and way of working, including, but not limited to:
 - Accessing and controlling tabs (i.e. opening a link in a new one and choosing if it's focused)
 - Cross domain http requests (extensions require)
 - Storing data (using HTML5 localStorage or similar/equivalent engines)
+- Managing resources (like large HTML snippets that are hard to read in raw JavaScript)
 - Managing add-on preferences (which some browsers call options or settings)
 - Triggering notifications (desktop or browser, depending on the browser's particular level of support)
 - Adding URLs to history (to mark links as visited)
@@ -75,8 +76,8 @@ The build system maintains browser-specific `build` directories based on `conf/s
 It uses symbolic links where possible, but falls back to hard links for Chrome and Safari
 (which silently ignore symlinks).
 
-One last Safari quirk: if the directory does not end in ".safariextension", it will not be
-recognized by Safari. Don't remove that from the name!
+It is recommended run `./script/build.sh maintain &` in the background.
+This automatically fixes broken hard links and updates `BabelExt.resources` every few seconds.
 
 ## Instructions for loading/testing an extension in each browser ##
 

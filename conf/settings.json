@@ -41,9 +41,12 @@
 
     "contentScriptFiles": [ "src/extension.js" ],
     "contentStyleFiles": [ "src/extension.css" ],
+    "resources": [ "res/extension.html" ],
     "match_domains": [ "babelext.com" ], // or *.babelext.com to include subdomains
     // whether to match https://<match_domain>:
     "match_secure_domain": true,
+
+    "maintenanceInterval": 5 * 1000, // the 'maintain' command will pause for this long between updates
 
     "environment_specific": {
         /*

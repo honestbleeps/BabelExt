@@ -4,6 +4,7 @@
 /build/firefox-addon-sdk
 /build/xar-url.txt
 /build/xar/
+/lib/BabelExtResources.js
 
 # Files and directories containing unpacked extensions:
 /build/Chrome
