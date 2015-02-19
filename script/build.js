@@ -907,7 +907,7 @@ function build_firefox() {
                 symbolicLink( file, 'build/firefox-unpacked/resources/'+settings.name+'/data/'+file )
             });
             fs.changeWorkingDirectory('build/firefox-unpacked');
-            childProcess.execFile( 'zip', ['../'+xpi,'install.rdf'], null, function(err,stdout,stderr) {
+            childProcess.execFile( 'zip', ['../../'+xpi,'install.rdf'], null, function(err,stdout,stderr) {
                 fs.changeWorkingDirectory('../..');
                 if ( stderr != '' ) { console.log(stderr.replace(/\n$/,'')); return program_counter.end(1); }
                 console.log('Built ' + xpi + '\n\033[1mRemember to restart Firefox if you added/removed any files!\033[0m');
