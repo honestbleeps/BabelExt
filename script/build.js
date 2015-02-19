@@ -521,7 +521,7 @@ function build_safari(login_info) {
         '9': 'j',
         'a': 'k',
         'b': 'l',
-        'g': 'm',
+        'c': 'm',
         'd': 'n',
         'e': 'o',
         'f': 'p',
