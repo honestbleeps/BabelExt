@@ -1330,7 +1330,9 @@ function release_chrome(login_info) {
                                 page.waitForElementsPresent(
                                     '#code',
                                     function() {
-                                        get_auth_key( page.evaluate(function() { return document.getElementById('code').value }) );
+                                        var code = page.evaluate(function() { return document.getElementById('code').value });
+                                        var post_data = "grant_type=authorization_code&redirect_uri=urn:ietf:wg:oauth:2.0:oob&client_id=" + login_info.client_id + "&client_secret=" + login_info.client_secret + "&code=" + code;
+                                        page.openBinary( 'https://accounts.google.com/o/oauth2/token', { data: post_data }, upload_and_publish );
                                     }
                                 )
                             },
@@ -1342,12 +1344,7 @@ function release_chrome(login_info) {
             }
         );
 
-        function get_auth_key(code) {
-            var post_data = "grant_type=authorization_code&redirect_uri=urn:ietf:wg:oauth:2.0:oob&client_id=" + login_info.client_id + "&client_secret=" + login_info.client_secret + "&code=" + code;
-            page.openBinary( 'https://accounts.google.com/o/oauth2/token', { data:  post_data }, upload_and_publish );
-        }
-
-        function upload_and_publish(data) {
+        function upload_and_publish(err, data) {
 
             data = JSON.parse(data);
 
