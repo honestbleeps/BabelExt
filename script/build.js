@@ -98,6 +98,22 @@ function hardLink( source, target ) {
 }
 
 /*
+ * Create a tree of directories
+ */
+function makeTree( directory ) {
+    directory = directory.split( '/' );
+    for ( var n=0; n!=directory.length; ++n ) {
+        if ( !fs.exists( directory.slice( 0, n ).join( '/' ) ) )
+            fs.makeDirectory(directory.slice( 0, n ).join( '/' ));
+    }
+}
+
+// Sugar functions to make the containing directory and file link:
+function makeTreeHardLink    ( source, target ) { makeTree( target.replace( /[^\/]+$/, '' ) );     hardLink( source, target ); }
+function makeTreeSymbolicLink( source, target ) { makeTree( target.replace( /[^\/]+$/, '' ) ); symbolicLink( source, target ); }
+
+
+/*
  * Return information about the specified files.
  * Currently returns an array of { name: ..., id: ..., modified: ... }
  * 'name' is the passed-in name, 'id' is the file's inode, and 'modified' is the modification time relative to the epoch.
@@ -557,12 +573,9 @@ function build_safari(login_info) {
     while (start_scripts.firstChild) start_scripts.removeChild(start_scripts.firstChild);
     while (  end_scripts.firstChild)   end_scripts.removeChild(  end_scripts.firstChild);
 
-    fs.makeDirectory('build/Safari.safariextension/icons');
-    fs.makeDirectory('build/Safari.safariextension/src');
-    fs.makeDirectory('build/Safari.safariextension/lib');
-
     settings.contentScriptFiles.forEach(function(file) {
-        hardLink( file, 'build/Safari.safariextension/' + file )
+
+        makeTreeHardLink( file, 'build/Safari.safariextension/' + file )
 
         var script = document.createElement("string");
         script.textContent = file;
@@ -584,7 +597,7 @@ function build_safari(login_info) {
     while (stylesheets.firstChild) stylesheets.removeChild(stylesheets.firstChild);
 
     settings.contentStyleFiles.forEach(function(file) {
-        hardLink( file, 'build/Safari.safariextension/' + file )
+        makeTreeHardLink( file, 'build/Safari.safariextension/' + file )
 
         var sheet = document.createElement("string");
         sheet.textContent = file;
@@ -808,13 +821,12 @@ function build_firefox() {
     // Copy scripts into place:
     fs.removeTree('build/Firefox/data'); // PhantomJS won't list dangling symlinks, so we have to just delete the directory and recreate it
     fs.makeDirectory('build/Firefox/data');
-    fs.makeDirectory('build/Firefox/data/src');
-    fs.makeDirectory('build/Firefox/data/lib');
-    fs.makeDirectory('build/Firefox/icons');
 
     var contentFiles = settings.contentScriptFiles.concat( settings.contentStyleFiles || [] );
 
-    contentFiles.forEach(function(file) { symbolicLink( file, 'build/Firefox/data/' + file ) });
+    contentFiles.forEach(function(file) {
+        makeTreeSymbolicLink( file, 'build/Firefox/data/' + file );
+    });
 
     // Create settings.js:
     fs.write(
@@ -845,8 +857,8 @@ function build_firefox() {
         "id": settings.id,
         "name": settings.name
     };
-    if (settings.icons[48]  ) { pkg.icon        = settings.icons[48]; symbolicLink( pkg.icon   , 'build/Firefox/'+pkg.icon    ); }
-    if (settings.icons[64]  ) { pkg.icon_64     = settings.icons[64]; symbolicLink( pkg.icon_64, 'build/Firefox/'+pkg.icon_64 ); }
+    if (settings.icons[48]  ) { pkg.icon        = settings.icons[48]; makeTreeSymbolicLink( pkg.icon   , 'build/Firefox/'+pkg.icon    ); }
+    if (settings.icons[64]  ) { pkg.icon_64     = settings.icons[64]; makeTreeSymbolicLink( pkg.icon_64, 'build/Firefox/'+pkg.icon_64 ); }
     if (settings.preferences) { pkg.preferences = settings.preferences; }
     fs.write( 'build/Firefox/package.json', JSON.stringify(pkg, null, '    ' ) + "\n", 'w' );
 
@@ -904,7 +916,7 @@ function build_firefox() {
             );
             contentFiles.forEach(function(file) {
                 fs.remove('build/firefox-unpacked/resources/'+settings.name+'/data/'+file);
-                symbolicLink( file, 'build/firefox-unpacked/resources/'+settings.name+'/data/'+file )
+                makeTreeSymbolicLink( file, 'build/firefox-unpacked/resources/'+settings.name+'/data/'+file )
             });
             fs.changeWorkingDirectory('build/firefox-unpacked');
             childProcess.execFile( 'zip', ['../../'+xpi,'install.rdf'], null, function(err,stdout,stderr) {
@@ -1043,12 +1055,8 @@ function build_chrome() {
     // Create manifest.json:
     fs.write( 'build/Chrome/manifest.json', JSON.stringify(manifest, null, '\t' ) + "\n", 'w' );
 
-    fs.makeDirectory('build/Chrome/icons');
-    fs.makeDirectory('build/Chrome/src');
-    fs.makeDirectory('build/Chrome/lib');
-
     // Copy scripts and icons into place:
-    contentFiles.forEach(function(file) { hardLink( file               , 'build/Chrome/' + file                ) });
+    contentFiles.forEach(function(file) { makeTreeHardLink( file, 'build/Chrome/' + file ) });
 
     program_counter.begin();
 
