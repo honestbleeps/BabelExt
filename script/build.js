@@ -1537,7 +1537,8 @@ function usage() {
         'Usage: ' + args[0] + ' <command> <build|release> <firefox|chrome|safari>\n' +
         'Commands:\n' +
         '    build <target> - builds extensions for "amo" (Firefox) "chrome" or "safari"\n' +
-        '    release <target> - release extension to "amo" (addons.mozilla.org) "chrome" (Chrome store), "opera" (opera site) or "safari" (extensions gallery)'
+        '    release <target> - release extension to "amo" (addons.mozilla.org) "chrome" (Chrome store), "opera" (opera site) or "safari" (extensions gallery)\n' +
+        '    maintain - keep various files up-to-date'
     );
     phantom.exit(1);
 }
