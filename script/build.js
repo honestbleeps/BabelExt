@@ -1476,17 +1476,18 @@ function maintain() {
 
     function maintain_resources() {
         update_settings();
-        if ( settings.resources )
+        if ( settings.resources ) {
             stat( [ 'lib/BabelExtResources.js' ].concat( settings.resources ), function(files) {
                 var resources_file = files.shift();
                 if ( files.filter(function(file) { return file.modified > resources_file.modified } ).length ) {
-                    console.log( 'Rebuilding ' + 'lib/BabelExtResources.js' );
+                    console.log( 'Rebuilding lib/BabelExtResources.js' );
                     build_resources();
                 }
                 maintain_content_files();
             });
-        else
+        } else {
             maintain_content_files();
+        }
     }
 
     function maintain_content_files() {
