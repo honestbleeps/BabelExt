@@ -19,6 +19,11 @@ var fs           = require('fs');
 var system       = require('system');
 var webPage      = require('webpage');
 
+/*
+ * OS INTERACTION
+ * improve PhantomJS' ability to interact with the operating system
+ */
+
 var chrome_command =
     ( system.os.name == 'windows' )
     ? 'chrome.exe'
@@ -132,26 +137,8 @@ function stat( files, callback ) {
 }
 
 /*
- * Build a resources.js file
- */
-function build_resources() {
-    if ( settings.resources ) {
-        var resources = {};
-        settings.resources.forEach(function(filename) {
-            resources[filename] = fs.open(filename, 'r').read();
-        });
-        fs.write(
-            'lib/BabelExtResources.js', "BabelExt.resources._resources = " +
-                // prettify our JavaScript a bit, for the benefit of reviewers:
-                JSON.stringify(resources, null, ' ').replace( /\\n(?!")/g, "\\n\" +\n    \"" ) + ";\n",
-            'w'
-        );
-        return true;
-    }
-}
-
-/*
- * Utility functions for pages
+ * PAGE UTILITIES
+ * Functions to better interact with web pages
  */
 
 function _waitForEvent( test, callback ) { // low-level interface - see waitFor* below
@@ -372,6 +359,10 @@ function page( url, callback ) {
 }
 
 /*
+ * MISCELLANEOUS BABELEXT-SPECIFIC UTILITIES
+ */
+
+/*
  * Keep track of asynchronous jobs, and exit when the last one finishes:
  */
 
@@ -384,6 +375,25 @@ AsyncCounter.prototype.begin = function(      ) {                               
 AsyncCounter.prototype.end   = function(errors) { this.errors += (errors||0); if ( !--this.count ) this.zero_callback(this.errors) };
 
 var program_counter = new AsyncCounter(function(errors) { phantom.exit(errors||0) });
+
+/*
+ * Build a resources.js file
+ */
+function build_resources() {
+    if ( settings.resources ) {
+        var resources = {};
+        settings.resources.forEach(function(filename) {
+            resources[filename] = fs.open(filename, 'r').read();
+        });
+        fs.write(
+            'lib/BabelExtResources.js', "BabelExt.resources._resources = " +
+                // prettify our JavaScript a bit, for the benefit of reviewers:
+                JSON.stringify(resources, null, ' ').replace( /\\n(?!")/g, "\\n\" +\n    \"" ) + ";\n",
+            'w'
+        );
+        return true;
+    }
+}
 
 /*
  * Load settings from conf/settings.json
