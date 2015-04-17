@@ -380,6 +380,11 @@ var program_counter = new AsyncCounter(function(errors) { phantom.exit(errors||0
  * Build a resources.js file
  */
 function build_resources() {
+    var about = "BabelExt.about = " + JSON.stringify({
+        version   : settings.version,
+        build_time: new Date().toString()
+    }) + ";\n";
+
     if ( settings.resources ) {
         var resources = {};
         settings.resources.forEach(function(filename) {
@@ -388,10 +393,12 @@ function build_resources() {
         fs.write(
             'lib/BabelExtResources.js', "BabelExt.resources._resources = " +
                 // prettify our JavaScript a bit, for the benefit of reviewers:
-                JSON.stringify(resources, null, ' ').replace( /\\n(?!")/g, "\\n\" +\n    \"" ) + ";\n",
+                JSON.stringify(resources, null, ' ').replace( /\\n(?!")/g, "\\n\" +\n    \"" ) + ";\n" +
+                about,
             'w'
         );
-        return true;
+    } else {
+        fs.write( 'lib/BabelExtResources.js', about, 'w' );
     }
 }
 
@@ -1562,7 +1569,8 @@ switch ( args[1] || '' ) {
 
 case 'build':
     if ( args.length != 3 ) usage();
-    if ( build_resources() ) settings.contentScriptFiles.splice(1, 0, 'lib/BabelExtResources.js');
+    build_resources();
+    settings.contentScriptFiles.splice(1, 0, 'lib/BabelExtResources.js');
     switch ( args[2] ) {
     case 'firefox': build_firefox(local_settings.   amo_login_info); break;
     case 'chrome' : build_chrome (local_settings.chrome_login_info); break;

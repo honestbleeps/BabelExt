@@ -240,6 +240,9 @@
     }
   });
 
+  // Information about the extension (e.g. version, build time)
+  console.log( BabelExt.about );
+
   /*
    * Dispatcher
    *
