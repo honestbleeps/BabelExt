@@ -54,7 +54,19 @@
          * variables from the relevant block will be used:
          */
         "development": {
+
             "contentScriptFiles": [],
+
+            /*
+             * Reloads unpacked extensions as frequently as possible.  Currently only supports
+             * Chrome/Opera, which can be forced to reload extensions so long as we avoid their
+             * "fast reload" protection.  Note that Firefox reloads unpacked extensions automatically.
+             *
+             * Valid values:
+             * + 'timeout' - reload as frequently as possible without triggering fast reloads
+             */
+            "autoReload": 'timeout',
+
         },
 
         "test": {

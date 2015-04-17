@@ -1004,6 +1004,8 @@ function build_chrome() {
                 fs.remove    ('build/Chrome/' + file);
         });
 
+        if ( settings.autoReload ) manifest.permissions.push('webNavigation');
+
         fs.write(
             'build/Chrome/' + manifest.background.scripts[0],
             "var default_preferences = {" +
@@ -1014,7 +1016,8 @@ function build_chrome() {
                 default       : return "'" + preference.name + "':" +  JSON.stringify(preference.value);
                 }
             }).join(', ') +
-            "};\n",
+            "};\n" +
+            "var auto_reload = " + (settings.autoReload == 'timeout') + ";\n",
             'w'
         );
 
