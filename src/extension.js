@@ -243,6 +243,11 @@
   // Information about the extension (e.g. version, build time)
   console.log( BabelExt.about );
 
+  // Simple framework for logging issues to the page:
+  var debugLog = BabelExt.debugLog();
+  debugLog.log( 'hello, world!' );
+  debugLog.show();
+
   /*
    * Dispatcher
    *
