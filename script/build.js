@@ -384,6 +384,7 @@ function build_resources() {
         version   : settings.version,
         build_time: new Date().toString()
     }) + ";\n";
+    var xhr_regexp = "BabelExt._xhr_regexp = new RegExp('" + ( settings.xhr_regexp || '(?!)' ) + "');\n";
 
     if ( settings.resources ) {
         var resources = {};
@@ -394,11 +395,11 @@ function build_resources() {
             'lib/BabelExtResources.js', "BabelExt.resources._resources = " +
                 // prettify our JavaScript a bit, for the benefit of reviewers:
                 JSON.stringify(resources, null, ' ').replace( /\\n(?!")/g, "\\n\" +\n    \"" ) + ";\n" +
-                about,
+                about + xhr_regexp,
             'w'
         );
     } else {
-        fs.write( 'lib/BabelExtResources.js', about, 'w' );
+        fs.write( 'lib/BabelExtResources.js', about + xhr_regexp, 'w' );
     }
 }
 
@@ -454,6 +455,28 @@ function update_settings() {
         );
         phantom.exit(1);
     }
+
+    if ( settings.xhr_patterns ) {
+        /*
+         * Convert a "match pattern" to a regular expression
+         * Different browsers implement this differently.
+         * We treat Chrome's implementation as canonical: https://developer.chrome.com/extensions/match_patterns
+         */
+        var regexps = [];
+        settings.xhr_patterns.forEach(function(pattern) {
+            if ( pattern.replace( /^(\*|https?|file|ftp):\/\/(\*|(?:\*\.)?[^\/*]*)\/(.*)$/, function( url, protocol, domain, path ) {
+                protocol = ( protocol == '*' ) ? 'https?' : protocol.replace( /[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g , "\\$&");
+                domain   = domain.replace( /[\-\[\]\/\{\}\(\)\+\?\.\\\^\$\|]/g , "\\$&").replace( '*', '[^/]*' );
+                path     = path  .replace( /[\-\[\]\/\{\}\(\)\+\?\.\\\^\$\|]/g , "\\$&").replace( '*', '.*' );
+                regexps.push( protocol + '://' + domain + '/' + path );
+                return url + ' ';
+            }) == pattern ) {
+                console.log( 'Ignoring invalid match pattern: ' + pattern );
+            }
+        });
+        settings.xhr_regexp = '^(?:' + regexps.join('|') + ')$';
+    }
+
 
     settings.preferences.forEach(function(preference) {
         /*
@@ -994,6 +1017,9 @@ function build_chrome() {
 
 
     var extra_files = [];
+
+    if ( settings.xhr_patterns )
+        manifest.permissions = settings.xhr_patterns.concat(manifest.permissions);
 
     if ( settings.preferences ) {
         manifest.options_page = "options.html";

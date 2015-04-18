@@ -12,19 +12,22 @@ chrome.runtime.onMessage.addListener(
 		switch(request.requestType) {
 			case 'xmlhttpRequest':
 				var xhr = new XMLHttpRequest();
-				xhr.open(request.method, request.url, true);
+				xhr.open(request.method, request.url, true, request.user, request.password);
 				if (request.method === "POST") {
 					xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 					// xhr.setRequestHeader("Content-length", request.data.length);
 					// xhr.setRequestHeader("Connection", "close");
 				}
-				xhr.onreadystatechange = function() {
-					if (xhr.readyState === 4) {
-						// Only store 'status' and 'responseText' fields and send them back.
-						var response = {status: xhr.status, responseText: xhr.responseText};
-						sendResponse(response);
-					}
-				};
+				Object.keys(request.headers).forEach(function(header) { xhr.setRequestHeader(header, request.headers[header]) });
+				if ( typeof(request.overrideMimeType) != 'undefined' ) xhr.overrideMimeType = request.overrideMimeType;
+				xhr.onload = function() {
+					var response = {status: xhr.status, statusText: xhr.statusText, responseText: xhr.responseText, _response_headers: xhr.getAllResponseHeaders()};
+					sendResponse(response);
+				}
+				xhr.onerror = function() {
+					var response = {status: xhr.status, statusText: xhr.statusText, responseText: xhr.responseText, _response_headers: xhr.getAllResponseHeaders(), error: true};
+					sendResponse(response);
+				}
 				xhr.send(request.data);
 				return true; // true must be returned here to indicate successful XHR
 				break;

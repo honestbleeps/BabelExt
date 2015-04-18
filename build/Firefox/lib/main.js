@@ -1,7 +1,7 @@
 // Import the APIs we need.
 
 var pageMod = require("sdk/page-mod");
-var Request = require("sdk/request").Request;
+var XMLHttpRequest = require("sdk/net/xhr").XMLHttpRequest;
 var notifications = require("sdk/notifications");
 var self = require("sdk/self");
 var tabs = require("sdk/tabs");
@@ -70,33 +70,22 @@ pageMod.PageMod({
 					callbackID: request.callbackID,
 					name: request.requestType
 				};
-				if (request.method == 'POST') {
-					Request({
-						url: request.url,
-						onComplete: function(response) {
-							responseObj.response = {
-								responseText: response.text,
-								status: response.status
-							};
-							worker.postMessage(responseObj);
-						},
-						headers: request.headers,
-						content: request.data
-					}).post();
-				} else {
-					Request({
-						url: request.url,
-						onComplete: function(response) {
-							responseObj.response = {
-								responseText: response.text,
-								status: response.status
-							};
-							worker.postMessage(responseObj);
-						},
-						headers: request.headers,
-						content: request.data
-					}).get();
+				var xhr = new XMLHttpRequest();
+				xhr.open(request.method, request.url, true, request.user, request.password);
+				if (request.method === "POST") {
+					xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 				}
+				Object.keys(request.headers).forEach(function(header) { xhr.setRequestHeader(header, request.headers[header]) });
+				if ( typeof(request.overrideMimeType) != 'undefined' ) xhr.overrideMimeType = request.overrideMimeType;
+				xhr.onload = function() {
+					responseObj.response = {status: xhr.status, statusText: xhr.statusText, responseText: xhr.responseText, _response_headers: xhr.getAllResponseHeaders()};
+					worker.postMessage(responseObj);
+				}
+				xhr.onerror = function() {
+					responseObj.response = {status: xhr.status, statusText: xhr.statusText, responseText: xhr.responseText, _response_headers: xhr.getAllResponseHeaders(), error: true};
+					worker.postMessage(responseObj);
+				}
+				xhr.send(request.data);
 				break;
 			case 'createTab':
 				var focus = (request.background !== true);

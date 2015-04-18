@@ -8,14 +8,19 @@
 			case 'xmlhttpRequest':
 				var xhr = new XMLHttpRequest();
 				xhr.XHRID = msgEvent.message.XHRID;
-				xhr.open(request.method, request.url, true);
+				xhr.open(request.method, request.url, true, request.user, request.password);
 				if (request.method == "POST") {
 					xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 				}
-				xhr.onreadystatechange = function() {
-				  if (xhr.readyState == 4) {
-					sendResponse(xhr, msgEvent);
-				  }
+				Object.keys(request.headers).forEach(function(header) { xhr.setRequestHeader(header, request.headers[header]) });
+				if ( typeof(request.overrideMimeType) != 'undefined' ) xhr.overrideMimeType = request.overrideMimeType;
+				xhr.onload = function() {
+					var response = {status: xhr.status, statusText: xhr.statusText, responseText: xhr.responseText, _response_headers: xhr.getAllResponseHeaders()};
+					sendResponse(response, msgEvent);
+				}
+				xhr.onerror = function() {
+					var response = {status: xhr.status, statusText: xhr.statusText, responseText: xhr.responseText, _response_headers: xhr.getAllResponseHeaders(), error: true};
+					sendResponse(response, msgEvent);
 				}
 				xhr.send(request.data);
 				break;

@@ -248,6 +248,22 @@
   debugLog.log( 'hello, world!' );
   debugLog.show();
 
+  // XMLHttpRequest-compatible API (supports cross-site requests and mixed content):
+  // see also BabelExt.xhr()
+  var same_site_xhr = new BabelExt.XMLHttpRequest();
+  same_site_xhr.open( 'GET', location.origin );
+  same_site_xhr.onreadystatechange = function() {
+      console.log( this.readyState, this.responseText );
+  }
+  same_site_xhr.send();
+
+  var cross_site_xhr = new BabelExt.XMLHttpRequest();
+  cross_site_xhr.open( 'GET', 'http://www.w3.org/' );
+  cross_site_xhr.onreadystatechange = function() {
+      console.log( this.readyState, this.responseText );
+  }
+  cross_site_xhr.send();
+
   /*
    * Dispatcher
    *
