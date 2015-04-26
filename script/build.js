@@ -995,7 +995,10 @@ function build_chrome() {
 	    {
 		"matches": match_urls,
 		"js": settings.contentScriptFiles,
-		"run_at": when_string[settings.contentScriptWhen]
+		"run_at": when_string[settings.contentScriptWhen],
+		// Chrome defaults to only loading in the main frame, Firefox can only load in all frames.
+		// Not sure which behaviour is better, but this at least makes it standard across browsers:
+		"all_frames": true
 	    }
 	],
 	"icons": settings.icons,
