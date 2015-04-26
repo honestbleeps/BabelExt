@@ -5,6 +5,11 @@ var contextMenuClick = function(info, tab, callbackID) {
 	});
 };
 
+var memoryStorage = { storage: {} };
+memoryStorage.   getItem = function(key       ) { return memoryStorage.storage[key] };
+memoryStorage.   setItem = function(key, value) { memoryStorage.storage[key] = value };
+memoryStorage.removeItem = function(key       ) { delete memoryStorage.storage[key] };
+
 chrome.runtime.onMessage.addListener(
 	function(request, sender, sendResponse) {
 		// all requests expect a JSON object with requestType and then the relevant
@@ -68,6 +73,21 @@ chrome.runtime.onMessage.addListener(
 						break;
 					case 'setItem':
 						localStorage.setItem(request.itemName, request.itemValue);
+						sendResponse({status: true, key: request.itemName, value: request.itemValue});
+						break;
+				}
+				break;
+			case 'memoryStorage':
+				switch (request.operation) {
+					case 'getItem':
+						sendResponse({status: true, key: request.itemName, value: memoryStorage.getItem(request.itemName)});
+						break;
+					case 'removeItem':
+						memoryStorage.removeItem(request.itemName);
+						sendResponse({status: true, key: request.itemName, value: null});
+						break;
+					case 'setItem':
+						memoryStorage.setItem(request.itemName, request.itemValue);
 						sendResponse({status: true, key: request.itemName, value: request.itemValue});
 						break;
 				}

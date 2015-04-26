@@ -78,6 +78,35 @@
 				<input type="submit" name="getValue" value="Get Value" id="getValueButton">
 			</form>
 		</div>
+		<div class="featureContainer" id="saveMemory">
+			<form id="setMemoryValueForm">
+				<legend>
+					Save a key in memory...
+				</legend>
+				<fieldset>
+					<label for="key">key</label>
+					<input type="text" name="key" id="setMemoryKey" value="">
+				</fieldset>
+				<fieldset>
+					<label for="value">value</label>
+					<input type="text" name="value" id="setMemoryValue" value="">
+				</fieldset>
+				<input type="submit" name="setMemoryValue" value="Set Value" id="setMemoryValueButton">
+			</form>
+		</div>
+		<div class="featureContainer" id="loadMemory">
+			<form id="getMemoryValueForm">
+				<legend>
+					Load a key...
+				</legend>
+				<fieldset>
+					<label for="key">key</label>
+					<input type="text" name="value"  id="getMemoryKey" value="">
+					<label for="retrievedvalue">value is:</label><div id="retreivedvalue"></div>
+				</fieldset>
+				<input type="submit" name="getMemoryValue" value="Get Value" id="getMemoryValueButton">
+			</form>
+		</div>
 		<div class="featureContainer" id="savePref">
 			<form id="setPrefValueForm">
 				<legend>

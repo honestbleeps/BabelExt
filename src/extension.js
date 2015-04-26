@@ -64,6 +64,7 @@
     }
   }
 
+  // BabelExt.storage stores data like localStorage:
   var setValueForm = document.getElementById('setValueForm');
   if (setValueForm) {
     setValueForm.addEventListener('submit', function(e) {
@@ -94,6 +95,44 @@
         var val = BabelExt.storage.get(key, function(returnData) {
           var retreivedValueEle = document.getElementById('retreivedvalue');
           retreivedValueEle.innerHTML = returnData.value || '';
+        });
+      }
+    });
+  }
+
+  // BabelExt.memoryStorage is similar to BabelExt.storage, but only stores data in memory
+  // This is useful for sensitive data that needs to persist for the duration of the browser
+  // WARNING: during development, memoryStorage is cleared when you reload the extension
+  var setMemoryValueForm = document.getElementById('setMemoryValueForm');
+  if (setMemoryValueForm) {
+    setMemoryValueForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      var keyEle = document.getElementById('setMemoryKey');
+      var valueEle = document.getElementById('setMemoryValue');
+      if (keyEle && valueEle) {
+        var key = keyEle.value;
+        var val = valueEle.value;
+        BabelExt.storage.set(key, val, function() {
+          var keyEle = document.getElementById('setMemoryKey');
+          var valueEle = document.getElementById('setMemoryValue');
+          keyEle.value = '';
+          valueEle.value = '';
+          alert('value set successfully');
+        });
+      }
+    });
+  }
+
+  var getMemoryValueForm = document.getElementById('getMemoryValueForm');
+  if (getMemoryValueForm) {
+    getMemoryValueForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      var keyEle = document.getElementById('getMemoryKey');
+      if (keyEle) {
+        var key = keyEle.value;
+        var val = BabelExt.storage.get(key, function(returnData) {
+          var retreivedMemoryValueEle = document.getElementById('retreivedmemoryvalue');
+          retreivedMemoryValueEle.innerHTML = returnData.value || '';
         });
       }
     });

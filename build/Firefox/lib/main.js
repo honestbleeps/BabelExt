@@ -34,15 +34,14 @@ var localStorage = ss.storage;
 
 // these aliases are just for simplicity, so that the code here looks just like background code
 // for all of the other browsers...
-localStorage.getItem = function(key) {
-	return ss.storage[key];
-};
-localStorage.setItem = function(key, value) {
-	ss.storage[key] = value;
-};
-localStorage.removeItem = function(key) {
-	delete ss.storage[key];
-};
+localStorage.   getItem = function(key       ) { return ss.storage[key] };
+localStorage.   setItem = function(key, value) { ss.storage[key] = value };
+localStorage.removeItem = function(key       ) { delete ss.storage[key] };
+
+var memoryStorage = { storage: {} };
+memoryStorage.   getItem = function(key       ) { return memoryStorage.storage[key] };
+memoryStorage.   setItem = function(key, value) { memoryStorage.storage[key] = value };
+memoryStorage.removeItem = function(key       ) { delete memoryStorage.storage[key] };
 
 var settings = require("./settings.js");
 
@@ -127,6 +126,38 @@ pageMod.PageMod({
 						localStorage.setItem(request.itemName, request.itemValue);
 						worker.postMessage({
 							name: 'localStorage',
+							callbackID: request.callbackID,
+							status: true,
+							key: request.itemName,
+							value: request.itemValue
+						});
+						break;
+				}
+				break;
+			case 'memoryStorage':
+				switch (request.operation) {
+					case 'getItem':
+						worker.postMessage({
+							name: 'memoryStorage',
+							callbackID: request.callbackID,
+							status: true,
+							key: request.itemName,
+							value: memoryStorage.getItem(request.itemName)
+						});
+						break;
+					case 'removeItem':
+						memoryStorage.removeItem(request.itemName);
+						worker.postMessage({
+							name: 'memoryStorage',
+							callbackID: request.callbackID,
+							status: true,
+							value: null
+						});
+						break;
+					case 'setItem':
+						memoryStorage.setItem(request.itemName, request.itemValue);
+						worker.postMessage({
+							name: 'memoryStorage',
 							callbackID: request.callbackID,
 							status: true,
 							key: request.itemName,

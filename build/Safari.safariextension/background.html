@@ -1,6 +1,11 @@
 <html>
 <head>
 	<script>
+	var memoryStorage = { storage: {} };
+	memoryStorage.   getItem = function(key       ) { return memoryStorage.storage[key] };
+	memoryStorage.   setItem = function(key, value) { memoryStorage.storage[key] = value };
+	memoryStorage.removeItem = function(key       ) { delete memoryStorage.storage[key] };
+
 	function respondToMessage (msgEvent) {
 		var request = msgEvent.message;
 		request.requestType = msgEvent.name;
@@ -69,6 +74,35 @@
 						break;
 					case 'setItem':
 						localStorage.setItem(request.itemName, request.itemValue);
+						sendResponse({
+							callbackID: request.callbackID,
+							status: true,
+							key: request.itemName,
+							value: request.itemValue
+						}, msgEvent);
+						break;
+				}
+				break;
+			case 'memoryStorage':
+				switch (request.operation) {
+					case 'getItem':
+						sendResponse({
+							callbackID: request.callbackID,
+							status: true,
+							key: request.itemName,
+							value: memoryStorage.getItem(request.itemName)
+						}, msgEvent);
+						break;
+					case 'removeItem':
+						memoryStorage.removeItem(request.itemName);
+						sendResponse({
+							callbackID: request.callbackID,
+							status: true,
+							value: null
+						}, msgEvent);
+						break;
+					case 'setItem':
+						memoryStorage.setItem(request.itemName, request.itemValue);
 						sendResponse({
 							callbackID: request.callbackID,
 							status: true,
