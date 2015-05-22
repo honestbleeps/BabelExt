@@ -1594,6 +1594,7 @@ var args = system.args;
 
 function usage() {
     console.log(
+        settings.name + ' v' + settings.version + ' (built on BabelExt)\n' +
         'Usage: ' + args[0] + ' <command> <build|release> <firefox|chrome|safari>\n' +
         'Commands:\n' +
         '    build <target> - builds extensions for "amo" (Firefox) "chrome" or "safari"\n' +
