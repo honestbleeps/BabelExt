@@ -54,10 +54,17 @@ var execFile = childProcess.execFile;
 childProcess.execFile = function(cmd, args, opts, cb) {
 
     // need to check both the callback and value of "exit":
-    var calls = 0, err, stdout, stderr, code;
+    var calls = 0, err, stdout, stderr, code, has_finished = false;
 
     // run the command and get stdout/stderr:
     var ctx = execFile.call( childProcess, cmd, args, opts, function(_err,_stdout,_stderr) {
+        setTimeout(function() {
+            if ( !has_finished ) {
+                console.log( cmd + ' returned but did not exit - does the command exist?' );
+                code = 100;
+                run_callback();
+            }
+        }, 1000 );
         err    = _err;
         stdout = _stdout;
         stderr = _stderr;
@@ -72,9 +79,12 @@ childProcess.execFile = function(cmd, args, opts, cb) {
 
     // once we've got all the information, print STDERR and continue if there was no error:
     function run_callback() {
-        if ( stderr != '' ) console.log(stderr.replace(/\n$/,''));
-        if ( code ) program_counter.end(code);
-        else if ( cb ) cb(null, stdout, stderr, code);
+        if ( !has_finished ) {
+            has_finished = true;
+            if ( stderr != '' ) console.log(stderr.replace(/\n$/,''));
+            if ( code ) program_counter.end(code);
+            else if ( cb ) cb(null, stdout, stderr, code);
+        }
     }
 
     return ctx;
