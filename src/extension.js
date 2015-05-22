@@ -289,6 +289,7 @@
 
   // XMLHttpRequest-compatible API (supports cross-site requests and mixed content):
   // see also BabelExt.xhr()
+  // If you use jQuery, look at the "xhr" parameter to $.ajaxSetup()
   var same_site_xhr = new BabelExt.XMLHttpRequest();
   same_site_xhr.open( 'GET', location.origin );
   same_site_xhr.onreadystatechange = function() {
