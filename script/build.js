@@ -507,6 +507,12 @@ update_settings();
  * Load settings from conf/local_settings.json
  */
 var local_settings;
+if ( !fs.exists('conf/local_settings.json') ) {
+    console.error(
+        "Please create conf/local_settings.json (you can probably just rename conf/local_settings.json.example)"
+    );
+    phantom.exit(1);
+}
 try {
     local_settings = eval('('+fs.read('conf/local_settings.json')+')');
 } catch (e) {
