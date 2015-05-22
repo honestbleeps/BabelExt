@@ -441,8 +441,9 @@ function update_settings() {
             });
     } else if ( settings.environment_specific ) {
         console.log(
-            'Please specify build environment using the ENVIRONMENT environment variable,\n' +
-            'or comment out the "environment_specific" section in settings.json'
+            'Please specify build environment using the ENVIRONMENT environment variable, e.g.:\n\n' +
+            '\texport ENVIRONMENT=' + Object.keys(settings.environment_specific)[0] + "\n\n" +
+            'Alternatively, comment out the "environment_specific" section in settings.json'
         );
         phantom.exit(1);
     };
