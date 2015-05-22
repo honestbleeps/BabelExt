@@ -66,6 +66,9 @@ First, download all of the source from Github and put it together within a folde
 
 Then, download [PhantomJS](http://phantomjs.org), which is used to build and deploy extensions.
 
+Next, rename `conf/local_settings.json.example` to `conf/local_settings.json`.  You will need
+to edit this when you release your extension, but the defaults should be fine for now.
+
 In UNIX-based OSes, run `./script/build.sh build <browser>` to build packages for each browser,
 and `./script/build.sh release <site>` to release them to the various extension sites.
 
