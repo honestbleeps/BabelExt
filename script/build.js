@@ -24,11 +24,15 @@ var webPage      = require('webpage');
  * improve PhantomJS' ability to interact with the operating system
  */
 
-var chrome_command =
-    ( system.os.name == 'windows' )
-    ? 'chrome.exe'
-    : 'google-chrome'
-;
+var chrome_command;
+switch ( system.os.name ) {
+case 'windows': chrome_command = 'chrome.exe'   ; break;
+case 'linux'  : chrome_command = 'google-chrome'; break;
+case 'mac'    : chrome_command = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'; break;
+default:
+   console.error( "Sorry, but your operating system (" + system.os.name + ") is not supported."  );
+   phantom.exit(1);
+}
 
 // script-wide debugging:
 phantom.onError = function(msg, trace) {
