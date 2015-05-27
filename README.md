@@ -2,6 +2,11 @@
 
 MIT (X11) license. See LICENSE.txt
 
+### Building ###
+
+To build run ./script/build.sh build chrome|safari|amo
+
+
 ### What is BabelExt? ###
 
 BabelExt is a library (or perhaps more of a boilerplate) meant to simplify the
