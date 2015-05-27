@@ -31,4 +31,4 @@ then
     export OPERA_PASSWORD
 fi
 
-exec /usr/bin/phantomjs --ssl-protocol=any ./script/build.js "$@"
+exec /usr/bin/env phantomjs --ssl-protocol=any ./script/build.js "$@"
