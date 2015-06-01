@@ -1637,7 +1637,7 @@ case 'release':
     case 'chrome': release_chrome(local_settings.chrome_login_info); break;
     case 'opera' : release_opera (local_settings. opera_login_info); break;
     case 'safari': release_safari(local_settings.safari_login_info); break;
-    default       : console.log( "Please specify 'amo', 'chrome', 'opera' or 'safari', not '" + args[2] + "'" ); break;
+    default      : console.log( "Please specify 'amo', 'chrome', 'opera' or 'safari', not '" + args[2] + "'" ); break;
     }
     break;
 
