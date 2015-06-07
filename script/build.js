@@ -1003,6 +1003,7 @@ function build_chrome() {
     });
 
     var manifest = {
+        "short_name": settings.short_title || settings.title,
         "name": settings.title,
         "author": settings.author,
         "version": settings.version,
