@@ -1,3 +1,9 @@
+### UPDATE 2016 ###
+
+BabelExt is essentially obsolete at this point, as Firefox now supports [WebExtensions](https://developer.mozilla.org/en-US/Add-ons/WebExtensions), Opera is now Chromium-based, and even Microsoft Edge [has adopted Chrome's format](https://developer.microsoft.com/en-us/microsoft-edge/extensions/).
+
+This was an incredibly fun/interesting exercise, but it will no longer be maintained at this point!  Thanks to all of those who used and provided feedback over the years.
+
 ### LICENSE ###
 
 MIT (X11) license. See LICENSE.txt
