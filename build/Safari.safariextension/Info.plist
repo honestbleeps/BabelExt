@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Author</key>
+	<string>honestbleeps</string>
+	<key>Builder Version</key>
+	<string>8537.85.12.18</string>
+	<key>CFBundleDisplayName</key>
+	<string>BabelExt</string>
+	<key>CFBundleIdentifier</key>
+	<string>com.honestbleeps.abcdefghijklmnopqabcdefghijklmnopqabcdefghij</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleShortVersionString</key>
+	<string>0.95</string>
+	<key>CFBundleVersion</key>
+	<string>0.95</string>
+	<key>Chrome</key>
+	<dict>
+		<key>Database Quota</key>
+		<real>10485760</real>
+		<key>Global Page</key>
+		<string>background.html</string>
+		<key>Popovers</key>
+		<array>
+			<dict>
+				<key>Filename</key>
+				<string>notification.html</string>
+				<key>Identifier</key>
+				<string>notification</string>
+			</dict>
+		</array>
+		<key>Toolbar Items</key>
+		<array>
+			<dict>
+				<key>Command</key>
+				<string/>
+				<key>Identifier</key>
+				<string>notificationButton</string>
+				<key>Image</key>
+				<string>notification.png</string>
+				<key>Label</key>
+				<string>Notifications</string>
+				<key>Palette Label</key>
+				<string>Notifications</string>
+				<key>Popover</key>
+				<string>notification</string>
+				<key>Tool Tip</key>
+				<string>Notifications from this BabelExt Extension</string>
+			</dict>
+		</array>
+	</dict>
+	<key>Content</key>
+	<dict>
+		<key>Scripts</key>
+		<dict>
+			<key>End</key>
+			<array>
+				<string>src/extension.js</string>
+			</array>
+			<key>Start</key>
+			<array>
+				<string>lib/BabelExt.js</string>
+			</array>
+		</dict>
+		<key>Stylesheets</key>
+		<array>
+			<string>src/extension.css</string>
+		</array>
+	</dict>
+	<key>Description</key>
+	<string>An extension created with BabelExt - www.babelext.com</string>
+	<key>DeveloperIdentifier</key>
+	<string>ABCDEFGHIJ</string>
+	<key>ExtensionInfoDictionaryVersion</key>
+	<string>1.0</string>
+	<key>Permissions</key>
+	<dict>
+		<key>Website Access</key>
+		<dict>
+			<key>Allowed Domains</key>
+			<array>
+				<string>babelext.com</string>
+			</array>
+			<key>Include Secure Pages</key>
+			<true/>
+			<key>Level</key>
+			<string>Some</string>
+		</dict>
+	</dict>
+	<key>Website</key>
+	<string>http://babelext.com</string>
+</dict>
+</plist>

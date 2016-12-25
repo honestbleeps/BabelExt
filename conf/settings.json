@@ -1,0 +1,154 @@
+/*
+ * BROWSER-NEUTRAL CONFIGURATION FILE
+ * (copied to browser-specific files during build)
+ */
+{
+    // In Linux, you can make a GUID by running `uuidgen` on the command line:
+    "id":            "abcdef01-2345-6789-9876-543210fedcba",
+
+    // General config parameters
+    "name":        "babelext_your_name_here",
+    "title":       "BabelExt Your Name Here",
+    "short_title": "Name Here", // Currently only used in Google Chrome
+    "description": "An extension created with BabelExt - www.babelext.com",
+    "license":     "GPL",
+    "author":      "honestbleeps",
+    "version":     "0.95",
+    "website":     "http://babelext.com",
+    "icons": {
+        /*
+        16:     "icons/icon-16.png",
+        32:     "icons/icon-32.png",
+        48:     "icons/icon-48.png",
+        64:     "icons/icon-64.png",
+        128:    "icons/icon-128.png"
+    */
+    },
+
+    "long_description":
+        "This extension uses the BabelExt cross-browser development framework.\n" +
+        "Go to http://www.babelext.com for more information.",
+
+    // userscript config parameters:
+
+    /*
+     * contentScriptWhen can be 'early', 'middle' or 'late'.
+     * different browsers interpret this in different ways, but in general:
+     * * 'early' runs at the earliest point supported by the browser (possibly before the DOM exists)
+     * * 'middle' guarantees the DOM exists, but might run while the page is still loading
+     * * 'late' guarantees the scripts are run aft the page finishes loading
+     */
+    "contentScriptWhen": "middle",
+
+    "contentScriptFiles": [ "src/extension.js" ],
+    "contentStyleFiles": [ "src/extension.css" ],
+    "resources": [ "res/extension.html" ],
+    "match_domains": [ "babelext.com" ], // or *.babelext.com to include subdomains
+    // whether to match https://<match_domain>:
+    "match_secure_domain": true,
+
+    "xhr_patterns": [
+        // allowed URL patterns for cross-site/mixed content XMLHttpRequests
+        // See https://developer.chrome.com/extensions/match_patterns
+        "http://www.w3.org/*"
+    ],
+
+    "maintenanceInterval": 5 * 1000, // the 'maintain' command will pause for this long between updates
+
+    "environment_specific": {
+        /*
+         * If you set the "ENVIRONMENT" environment variable,
+         * variables from the relevant block will be used:
+         */
+        "development": {
+
+            "contentScriptFiles": [],
+
+            /*
+             * Reloads unpacked extensions as frequently as possible.  Currently only supports
+             * Chrome/Opera, which can be forced to reload extensions so long as we avoid their
+             * "fast reload" protection.  Note that Firefox reloads unpacked extensions automatically.
+             *
+             * Valid values:
+             * + 'timeout' - reload as frequently as possible without triggering fast reloads
+             */
+            "autoReload": 'timeout',
+
+        },
+
+        "test": {
+            "contentScriptFiles": [ "src/test-helper.js" ],
+        },
+
+        "production": {
+            "match_domain":       "babelext.com",
+        }
+
+    },
+
+    "preferences": [
+        /*
+         * Preferences that users can set in the browser's preferences page.
+         * The layout is based on Mozilla's "simple preferences" interface:
+         * https://developer.mozilla.org/en-US/Add-ons/SDK/High-Level_APIs/simple-prefs
+         * currently supported types: bool, boolint, integer, string, menulist, radio
+         */
+        {
+            "name": "myBool",
+            "type": "bool",
+            "title": "myBool preference title",
+            "description": "myBool short description for the preference",
+            "value": false, // default value - true or false
+        },
+        {
+            "name": "myBoolint",
+            "type": "boolint",
+            "title": "myBoolint preference title",
+            "description": "myBoolint short description for the preference",
+            "off": "1",
+            "on": "2",
+            "value": 1, // default value - 0 or 1
+        },
+        {
+            "name": "myInteger",
+            "type": "integer",
+            "title": "myInteger preference title",
+            "description": "myInteger short description for the preference",
+            "value": 2, // default value - integer number
+        },
+        {
+            "name": "myString",
+            "type": "string",
+            "title": "myString preference title",
+            "description": "myString short description for the preference",
+            "value": "this is the default string value",
+        },
+        {
+            "name": "myMenulist",
+            "type": "menulist",
+            "title": "myMenulist preference title",
+            "value": 0,
+            "options": [
+                { "value": "0", "label": "first label" },
+                { "value": "1", "label": "second label" },
+                { "value": "2", "label": "third label" },
+            ]
+        },
+        {
+            "name": "myRadio",
+            "type": "radio",
+            "title": "myRadioTitle",
+            "value": "a",
+            "options": [
+                { "value": "a", "label": "first label" },
+                { "value": "b", "label": "second label" },
+                { "value": "c", "label": "third label" },
+            ]
+        },
+    ],
+
+    "firefox_max_version": '32.*',
+
+    "safari_team_id": 'ABCDEFGHIJ' // visible at https://developer.apple.com/membercenter/index.action#accountSummary
+
+}

@@ -1,0 +1,25 @@
+# Files and directories used during the build process:
+/build/firefox-unpacked
+/build/firefox-addon-sdk-url.txt
+/build/firefox-addon-sdk
+/build/xar-url.txt
+/build/xar/
+/lib/BabelExtResources.js
+
+# Files and directories containing unpacked extensions:
+/build/Chrome
+/build/Firefox/*.png
+/build/Firefox/data
+/build/Firefox/icons
+/build/Safari.safariextension
+
+# output directory:
+/out
+
+# Files containing sensitive information that must never go in version control:
+/build/safari-certs
+/build/Chrome.pem
+/conf/local_settings.json
+
+# miscellaneous:
+*~

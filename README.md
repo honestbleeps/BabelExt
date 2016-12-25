@@ -8,6 +8,11 @@ This was an incredibly fun/interesting exercise, but it will no longer be mainta
 
 MIT (X11) license. See LICENSE.txt
 
+### Building ###
+
+To build run ./script/build.sh build chrome|safari|amo
+
+
 ### What is BabelExt? ###
 
 BabelExt is a library (or perhaps more of a boilerplate) meant to simplify the
@@ -40,6 +45,8 @@ has its own function calls and way of working, including, but not limited to:
 - Accessing and controlling tabs (i.e. opening a link in a new one and choosing if it's focused)
 - Cross domain http requests (extensions require)
 - Storing data (using HTML5 localStorage or similar/equivalent engines)
+- Managing resources (like large HTML snippets that are hard to read in raw JavaScript)
+- Managing add-on preferences (which some browsers call options or settings)
 - Triggering notifications (desktop or browser, depending on the browser's particular level of support)
 - Adding URLs to history (to mark links as visited)
 	- Note: this is a bit of a hack in all non-Chrome browsers...
@@ -54,10 +61,11 @@ websites or functionality on the web.  For this reason, functionality that is no
 by one or more of the 4 BabelExt browsers (Chrome, Firefox, Opera, Safari) may not be added
 to BabelExt.
 
-BabelExt also isn't meant to handle building each browser's native settings consoles/panels, etc.
-They're just too different from each other to try and abstract into a nice little package,
-and with the 4 supported browsers all handling modern HTML/CSS/Javascript so well - it makes
-sense (to me, anyhow) to build settings consoles and the like using those technologies.
+Because each browser implements preferences in a slightly different way, BabelExt only supports
+the baseline functionality that can be supported across all browsers.  That might be enough if
+you only need a few buttons and options, but with the 4 supported browsers all handling modern
+HTML/CSS/Javascript so well - it makes sense (to me, anyhow) to build preference pages into the
+site your extension is for.
 
 That's what I did with Reddit Enhancement Suite, and it has worked rather well. I am considering
 adding the automatic form rendering code from RES into BabelExt, but I will need to devote some
@@ -67,36 +75,36 @@ thought to how to make it more universally useful.
 
 First, download all of the source from Github and put it together within a folder.
 
-In Windows, run `makelinks.bat` to create symlinks to extension.js - these links are not
-handled by github, which is why you unfortuntately have to make them yourself. 
-**NOTE:** You may need to open a command prompt as Administrator for this batch file to
-work.
+Then, download [PhantomJS](http://phantomjs.org), which is used to build and deploy extensions.
 
-In UNIX-based OSes, you can run `makelinks.sh`.  Note that this will make hardlinks.
+Next, rename `conf/local_settings.json.example` to `conf/local_settings.json`.  You will need
+to edit this when you release your extension, but the defaults should be fine for now.
 
-**IMPORTANT OPERA NOTE:** Note that the Opera js file has .user.js in it - that's because without this,
-@include and @exclude directives will be ignored and your script will run on every page on
-the internet!
+In UNIX-based OSes, run `./script/build.sh build <browser>` to build packages for each browser,
+and `./script/build.sh release <site>` to release them to the various extension sites.
 
-**IMPORTANT SAFARI NOTE:** Safari has a "security feature" that is not documented, gives no user
-feedback at all, and can be a HUGE time sink if you don't know about it!  If you have any
-files in your extension folder that are symlinks, Safari will **silently** ignore them.
-With Safari, a hard link will work, but a symbolic link will not.  If you made the links
-yourself instead of using the batch file, and your extension is doing nothing at all in
-Safari, double check that!
+The build system hasn't been tested under Windows yet - your best bet is probably to look at
+the scripts and write a Windows equivalent.  If it's any good, please send in a patch!
 
-One last Safari quirk: if the directory does not end in ".safariextension", it will not be
-recognized by Safari. Don't remove that from the name!
+The build system maintains browser-specific `build` directories based on `conf/settings.json`.
+It uses symbolic links where possible, but falls back to hard links for Chrome and Safari
+(which silently ignore symlinks).
+
+It is recommended run `./script/build.sh maintain &` in the background.
+This automatically fixes broken hard links and updates `BabelExt.resources` every few seconds.
 
 ## Instructions for loading/testing an extension in each browser ##
 
-### Chrome ###
+- You need to build the package before you start - the initial build
+  process configures some files that aren't stored in git
 
-- Click the wrench icon and choose Tools -> Extensions
+### Chrome / Opera ###
 
-- Check the "Developer Mode" checkbox
+- Go to about://extensions
 
-- Click "load unpacked extension" and choose the Chrome directory
+- Check "Developer Mode"
+
+- Click "load unpacked extension" and choose the build/Chrome directory
 
 - You're good to go! If you just want to try out the BabelExt kitchen sink demo, navigate to [http://babelext.com/demo/](http://babelext.com/demo/)
 
@@ -104,26 +112,19 @@ recognized by Safari. Don't remove that from the name!
 
 ### Firefox ###
 
-- Download the Firefox Addon SDK from [https://addons.mozilla.org/en-US/developers/builder](https://addons.mozilla.org/en-US/developers/builder)
+- Go to about:addons, click the "Tools" icon in the top-right and install the add-on from file
 
-- Follow the installation instructions there, and run the appropriate activation script (i.e. bin\activate.bat in windows)
+- Go to about:support and click the "Open Directory" to go to your profile directory
 
-- Navigate to the Firefox directory under BabelExt, and type: cfx run
+- Open the "extensions" subdirectory and look for a subdirectory matching the "id" in your settings.json file
 
-- You're good to go! If you just want to try out the BabelExt kitchen sink demo, navigate to [http://babelext.com/demo/](http://babelext.com/demo/)
+- Delete the file and replace it with a link to your extension's "build/firefox-unpacked" directory
 
-- Further Firefox development information can be found at [https://addons.mozilla.org/en-US/developers/docs/sdk/latest/](https://addons.mozilla.org/en-US/developers/docs/sdk/latest/)
-
-### Opera ###
-
-- Click Tools -> Extensions -> Manage Extensions
-
-- Find the config.xml file in the Opera directory of BabelExt, and drag it to the Extensions window
+- Restart Firefox
 
 - You're good to go! If you just want to try out the BabelExt kitchen sink demo, navigate to [http://babelext.com/demo/](http://babelext.com/demo/)
 
-- Further Opera development information can be found at [http://dev.opera.com/addons/extensions/](http://dev.opera.com/addons/extensions/)
-
+- Further Firefox development information: [Add-on SDK](https://addons.mozilla.org/en-US/developers/docs/sdk/latest/) and [setting up an extension development environment](https://developer.mozilla.org/en-US/Add-ons/Setting_up_extension_development_environment)
 
 ### Safari ###
 
@@ -135,8 +136,49 @@ recognized by Safari. Don't remove that from the name!
 
 - Click the + button at the bottom left, and choose "Add Extension"
 
-- Choose the Safari.safariextension folder from BabelExt
+- Choose the build/Safari.safariextension folder from BabelExt
 
 - You're good to go! If you just want to try out the BabelExt kitchen sink demo, navigate to [http://babelext.com/demo/](http://babelext.com/demo/)
 
 - Further Safari development information can be found at [https://developer.apple.com/library/safari/#documentation/Tools/Conceptual/SafariExtensionGuide/Introduction/Introduction.html](https://developer.apple.com/library/safari/#documentation/Tools/Conceptual/SafariExtensionGuide/Introduction/Introduction.html)
+
+#### Certificates ####
+
+Safari requires all packages to be signed with a private key that's been registered with Apple.
+You can develop unpacked extensions without a license, but you will need a (free) Apple Developer
+account to build a package.  You will also need to create a private key, which you can do with:
+
+    openssl req -new -nodes -newkey rsa:2048 -keyout build/safari-info/id.rsa -out apple-cert.csr
+
+Apple seems to prefer you have a single private key per Apple Developer account.
+If you maintain several projects with one account, consider linking build/safari-certs to a central location.
+
+BabelExt will automatically register your key and download extra certificates if you pass in your
+username and password.  Here are the steps if you prefer to do it by hand:
+
+- Go through [Apple's Certificate Request process](https://developer.apple.com/account/safari/certificate/certificateRequest.action) and save your certificate as `build/safari-certs/local.cer`
+- Download [Apple's Worldwide Developer Relations Certificate](https://developer.apple.com/certificationauthority/AppleWWDRCA.) to `build/safari-certs/AppleIncRootCertificate.cer`
+- Download [Apple's Root Certificate](https://www.apple.com/appleca/AppleIncRootCertificate.cer) to `build/safari-certs/AppleWWDRCA.cer`
+- Download and compile [a modified version of the "xar" tool](http://mackyle.github.io/xar/) as `build/xar`
+
+Note: some online documentation refers to these keys as `cert00`, `cert01` and `cert02`
+(these are the names `xar` uses when extracting them from a package)
+
+## Resetting extension data ##
+
+If your extension uses storage or preferences, you will need to test the extension data with
+different stored values.  Apart from Safari, all the browsers let you create multiple
+profiles ("users" in Chrome), so you might want to create throwaway profiles for use during
+testing.
+
+Private browsing isn't much help here, as some private browsing data will be initialised from
+your public data.  If you find profiles too much effort, Chrome/Opera also let you clear
+extension data by deleting all files matching <profile_directory>/Local*/*<extension_ID>*
+
+## Releasing packages ##
+
+You need to release the first version of your extension by hand, because each site has slightly
+different requirements for their extensions.
+
+After the initial release, fill in `local_settings.json` and run `script/build.sh release <site>`
+to release and update metadata.

@@ -1,0 +1,38 @@
+{
+	"name": "BabelExt",
+	"author": "honestbleeps",
+	"version": "0.95",
+	"manifest_version": 2,
+	"description": "An extension created with BabelExt - www.babelext.com",
+	"background": {
+		"scripts": [
+			"preferences.js",
+			"background.js"
+		]
+	},
+	"content_scripts": [
+		{
+			"matches": [
+				"*://babelext.com/*"
+			],
+			"js": [
+				"lib/BabelExt.js",
+				"src/extension.js"
+			],
+			"run_at": "document_end",
+			"css": [
+				"src/extension.css"
+			]
+		}
+	],
+	"icons": {},
+	"permissions": [
+		"*://babelext.com/*",
+		"contextMenus",
+		"tabs",
+		"history",
+		"notifications",
+		"storage"
+	],
+	"options_page": "options.html"
+}

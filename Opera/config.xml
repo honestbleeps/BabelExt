@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<widget xmlns="http://www.w3.org/ns/widgets" version="0.9" id="extensions:CHANGE_THIS_TO_SOMETHING_UNIQUE">
-	<name>BabelExt Extension</name>
-	<description>An extension created with BabelExt - www.babelext.com</description>
-  <update-description href="http://example.com/your_update_url_here"/>
-  <author href="http://babelext.com/">Steve Sobel</author>
-  <access origin="http://babelext.com/" subdomains="true" />
-  <icon src="logo.gif" />
-</widget>

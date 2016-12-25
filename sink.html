@@ -33,16 +33,15 @@
 	</style>
 </head>
 <body>
-	
+
 	<h1>BabelExt Kitchen Sink Demos</h1>
 
 	<div id="installBabelExt">
 		This demonstration requires that you have the BabelExt extension installed in your browser.  You can always acquire and compile the very latest from <a target="_blank" href="http://github.com/honestbleeps/BabelExt">the Github repo</a>, but you can also download compiled versions here for each browser:
 
 		<ul>
-			<li><a href="bin/BabelExt.crx">Chrome</a></li>
+			<li><a href="bin/BabelExt.crx">Chrome/Opera</a></li>
 			<li><a href="bin/BabelExt.xpi">Firefox</a></li>
-			<li><a href="bin/BabelExt.oex">Opera</a></li>
 			<li><a href="bin/BabelExt.safariextz">Safari</a></li>
 		</ul>
 
@@ -77,6 +76,76 @@
 					<label for="retrievedvalue">value is:</label><div id="retreivedvalue"></div>
 				</fieldset>
 				<input type="submit" name="getValue" value="Get Value" id="getValueButton">
+			</form>
+		</div>
+		<div class="featureContainer" id="saveMemory">
+			<form id="setMemoryValueForm">
+				<legend>
+					Save a key in memory...
+				</legend>
+				<fieldset>
+					<label for="key">key</label>
+					<input type="text" name="key" id="setMemoryKey" value="">
+				</fieldset>
+				<fieldset>
+					<label for="value">value</label>
+					<input type="text" name="value" id="setMemoryValue" value="">
+				</fieldset>
+				<input type="submit" name="setMemoryValue" value="Set Value" id="setMemoryValueButton">
+			</form>
+		</div>
+		<div class="featureContainer" id="loadMemory">
+			<form id="getMemoryValueForm">
+				<legend>
+					Load a key...
+				</legend>
+				<fieldset>
+					<label for="key">key</label>
+					<input type="text" name="value"  id="getMemoryKey" value="">
+					<label for="retrievedvalue">value is:</label><div id="retreivedvalue"></div>
+				</fieldset>
+				<input type="submit" name="getMemoryValue" value="Get Value" id="getMemoryValueButton">
+			</form>
+		</div>
+		<div class="featureContainer" id="savePref">
+			<form id="setPrefValueForm">
+				<legend>
+					Save a preference...
+				</legend>
+				<fieldset>
+					<select id="setPrefKey">
+						<option>myBool</option>
+						<option>myBoolint</option>
+						<option>myInteger</option>
+						<option>myString</option>
+						<option>myMenulist</option>
+						<option>myRadio</option>
+					</select>
+				</fieldset>
+				<fieldset>
+					<label for="value">value</label>
+					<input type="text" name="value" id="setPrefValue" value="">
+				</fieldset>
+				<input type="submit" name="setPrefValue" value="Set Preference Value" id="setPrefButton">
+			</form>
+		</div>
+		<div class="featureContainer" id="loadPref">
+			<form id="getPrefValueForm">
+				<legend>
+					Load a preference...
+				</legend>
+				<fieldset>
+					<select id="getPrefKey">
+						<option>myBool</option>
+						<option>myBoolint</option>
+						<option>myInteger</option>
+						<option>myString</option>
+						<option>myMenulist</option>
+						<option>myRadio</option>
+					</select>
+					<label for="retrievedprefvalue">value is:</label><div id="retreivedprefvalue"></div>
+				</fieldset>
+				<input type="submit" name="getPrefValue" value="Get Prefence Value" id="getPrefValueButton">
 			</form>
 		</div>
 		<div class="featureContainer" id="tabCreate">
