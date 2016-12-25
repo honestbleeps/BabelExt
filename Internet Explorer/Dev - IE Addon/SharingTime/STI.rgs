@@ -1,0 +1,49 @@
+HKCR
+{
+	ST.STI.1 = s 'SharingTime'
+	{
+		CLSID = s '{5BF86DC2-EA0C-4ace-BB3F-3CAD69363D17}'
+	}
+	ST.STI = s 'SharingTime'
+	{
+		CLSID = s '{5BF86DC2-EA0C-4ace-BB3F-3CAD69363D17}'
+		CurVer = s 'ST.STI.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {5BF86DC2-EA0C-4ace-BB3F-3CAD69363D17} = s 'SharingTime'
+		{
+			ProgID = s 'ST.STI.1'
+			VersionIndependentProgID = s 'ST.STI'
+			ForceRemove 'Programmable'
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Apartment'
+			}
+			'TypeLib' = s '{331AE64E-2726-47a1-9CAF-42E31502CAF4}'
+		}
+	}
+}
+
+HKLM
+{
+    NoRemove SOFTWARE
+    {
+        NoRemove Microsoft
+        {   
+            NoRemove Windows
+            {
+                NoRemove CurrentVersion
+                {
+                    NoRemove Explorer
+                    {
+                        NoRemove 'Browser Helper Objects'
+                        {
+                            ForceRemove {5BF86DC2-EA0C-4ace-BB3F-3CAD69363D17} = s 'SharingTime'
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,17 @@
+IMPORTANT: For a trouble-free build, the following steps are important.
+
+1. Go to the Start menu and find Visual Studio 2008.
+2. Right-click and choose "Run as Administrator".
+3. Find the SharingTime.sln file and load it.
+
+During the build process, the ST.dll file will have been registered in the
+Release directory. If you copy it to the C:\Program Files\SharingTime\core
+directory, the registry will still cause the file in the Release directory
+to be loaded. To fix this, perform the following steps after copying ST.dll
+to the C:\Program Files\SharingTime\core directory:
+
+1. Go to Start - Accessories.
+2. Right-click on Command Prompt and choose "Run as Administrator".
+3. Change to the C:\Program Files\SharingTime\core directory.
+4. Run the following command > regsvr32 ST.dll
+
